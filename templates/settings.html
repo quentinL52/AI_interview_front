@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}Paramètres - AIrh{% endblock %}
+
+{% block content %}
+<style>
+    .page-title {
+        font-size: 2rem;
+        font-weight: 600;
+        color: var(--text-color);
+        margin-bottom: 0.5rem;
+    }
+
+    .page-subtitle {
+        color: #6B7280;
+        font-size: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .settings-container {
+        background: white;
+        border-radius: 0.75rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+
+    .tab-content {
+        padding: 2rem;
+    }
+
+    .info-row {
+        display: flex;
+        padding: 1rem 0;
+        border-bottom: 1px solid #F3F4F6;
+    }
+
+    .info-row:last-child {
+        border-bottom: none;
+    }
+
+    .info-label {
+        width: 200px;
+        color: #6B7280;
+        font-weight: 500;
+    }
+
+    .info-value {
+        flex: 1;
+        color: var(--text-color);
+    }
+
+    .edit-button {
+        padding: 0.5rem 1rem;
+        background: white;
+        border: 1px solid var(--border-color);
+        border-radius: 0.375rem;
+        color: var(--text-color);
+        font-size: 0.875rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+        margin-left: auto;
+    }
+
+    .edit-button:hover {
+        background: #F3F4F6;
+    }
+</style>
+
+<h1 class="page-title">Paramètres</h1>
+<p class="page-subtitle">Consultez vos paramètres de compte ici</p>
+
+<div class="settings-container">
+    <div class="tab-content">
+        <div class="info-row">
+            <div class="info-label">Nom</div>
+            <div class="info-value">{{ user.name }}</div>
+        </div>
+        <div class="info-row">
+            <div class="info-label">Email</div>
+            <div class="info-value">{{ user.email }}</div>
+        </div>
+        <div class="info-row">
+            <div class="info-label">Date d'inscription</div>
+            <div class="info-value">{{ user.created_at.strftime('%d-%m-%Y') }}</div>
+        </div>
+    </div>
+</div>
+{% endblock %}

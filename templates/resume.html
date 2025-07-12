@@ -1,0 +1,595 @@
+{% extends "base.html" %}
+
+{% block title %}Resume - AIrh{% endblock %}
+
+{% block content %}
+<style>
+    .page-title {
+        font-size: 2rem;
+        font-weight: 600;
+        color: var(--text-color);
+        margin-bottom: 2rem;
+    }
+
+    .upload-container {
+        background: white;
+        border-radius: 0.75rem;
+        padding: 2rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .upload-section {
+        background: white;
+        border-radius: 0.75rem;
+        padding: 1rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+        max-width: 400px;
+        margin-left: auto;
+        margin-right: auto;
+        margin-top: -2rem;
+    }
+
+    .upload-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .upload-icon {
+        width: 32px;
+        height: 32px;
+        background: #E0E7FF;
+        border-radius: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--primary-color);
+        font-size: 1rem;
+    }
+
+    .upload-title {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text-color);
+        margin: 0;
+    }
+
+    .upload-area {
+        border: 2px dashed var(--border-color);
+        border-radius: 0.5rem;
+        padding: 1rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .upload-area:hover {
+        border-color: var(--primary-color);
+        background: #F9FAFB;
+    }
+
+    .upload-area i {
+        font-size: 1.5rem;
+        color: #9CA3AF;
+        margin-bottom: 0.5rem;
+    }
+
+    .upload-text {
+        color: #6B7280;
+        margin-bottom: 0.35rem;
+        font-size: 0.9rem;
+    }
+
+    .upload-hint {
+        font-size: 0.8rem;
+        color: #9CA3AF;
+        margin-top: 0.5rem;
+    }
+
+    .upload-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.25rem 0.5rem;
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: 0.375rem;
+        font-weight: 500;
+        font-size: 0.8rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        margin-top: 0.75rem;
+    }
+
+    .upload-button:hover {
+        background: var(--secondary-color);
+    }
+
+    .upload-button:disabled {
+        background: #9CA3AF;
+        cursor: not-allowed;
+    }
+
+    .uploaded-file {
+        background: white;
+        border: 1px solid var(--border-color);
+        border-radius: 0.5rem;
+        padding: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .file-icon {
+        width: 48px;
+        height: 48px;
+        background: #FEE2E2;
+        border-radius: 0.375rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #DC2626;
+        font-size: 1.5rem;
+    }
+
+    .file-info {
+        flex: 1;
+    }
+
+    .file-name {
+        font-weight: 600;
+        color: var(--text-color);
+        margin-bottom: 0.25rem;
+    }
+
+    .file-date {
+        font-size: 0.875rem;
+        color: #6B7280;
+    }
+
+    .file-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .action-button {
+        padding: 0.5rem 1rem;
+        background: white;
+        border: 1px solid var(--border-color);
+        border-radius: 0.375rem;
+        color: var(--text-color);
+        font-size: 0.875rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .action-button:hover {
+        background: #F3F4F6;
+    }
+
+    .action-button.delete {
+        color: #DC2626;
+    }
+
+    .action-button.delete:hover {
+        background: #FEE2E2;
+        border-color: #DC2626;
+    }
+
+    .upload-status {
+        margin-top: 1rem;
+        padding: 1rem;
+        border-radius: 0.375rem;
+        display: none;
+    }
+
+    .upload-status.success {
+        background: #D1FAE5;
+        color: #065F46;
+        display: block;
+    }
+
+    .upload-status.error {
+        background: #FEE2E2;
+        color: #991B1B;
+        display: block;
+    }
+
+    .upload-progress {
+        margin-top: 1rem;
+        display: none;
+    }
+
+    .progress-bar {
+        width: 100%;
+        height: 8px;
+        background: #E5E7EB;
+        border-radius: 4px;
+        overflow: hidden;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: var(--primary-color);
+        width: 0;
+        transition: width 0.3s;
+    }
+
+    .cv-section {
+        background: white;
+        border-radius: 0.75rem;
+        padding: 2rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        margin-top: 2rem;
+    }
+
+    .cv-section-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--text-color);
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid var(--primary-color);
+    }
+
+    .cv-info {
+        margin-bottom: 1.5rem;
+    }
+
+    .cv-info-title {
+        font-weight: 600;
+        color: var(--text-color);
+        margin-bottom: 0.5rem;
+    }
+
+    .cv-info-content {
+        color: #4B5563;
+        line-height: 1.6;
+    }
+
+    .cv-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .cv-list-item {
+        padding: 0.75rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .cv-list-item:last-child {
+        border-bottom: none;
+    }
+
+    .cv-tag {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        background: #E5E7EB;
+        border-radius: 1rem;
+        font-size: 0.875rem;
+        color: #4B5563;
+        margin: 0.25rem;
+    }
+</style>
+
+<div class="page-header">
+    <h1 class="page-title">Resume</h1>
+</div>
+
+{% if resume %}
+    <div class="resume-section">
+        <div class="resume-header">
+            <div class="resume-icon">
+                <i class="fas fa-file-alt"></i>
+            </div>
+            <div>
+                <h3 class="resume-title">{{ resume.filename }}</h3>
+                <p class="resume-date">Uploaded on {{ resume.upload_date.strftime('%B %d, %Y') }}</p>
+            </div>
+        </div>
+        
+        <div class="resume-actions">
+            <button class="action-button" onclick="window.location.href='{{ url_for('download_resume') }}'">
+                <i class="fas fa-download"></i>
+                Download
+            </button>
+            <button class="action-button delete" onclick="deleteResume()">
+                <i class="fas fa-trash"></i>
+                Delete
+            </button>
+        </div>
+    </div>
+{% else %}
+    <div class="upload-section" style="max-width: 350px; margin-top: -1rem;">
+        <form id="uploadForm" enctype="multipart/form-data">
+            <div class="upload-area" id="dropZone">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <p class="upload-text">Glissez-déposez votre CV ici ou</p>
+                <button type="button" class="upload-button" onclick="document.getElementById('fileInput').click()">
+                    <i class="fas fa-folder-open"></i>
+                    Parcourir
+                </button>
+                <input type="file" id="fileInput" name="resume" accept=".pdf" style="display: none">
+                <p class="upload-hint">Format accepté : PDF</p>
+            </div>
+            
+            <div class="upload-progress" id="uploadProgress">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+            </div>
+            
+            <div class="upload-status" id="uploadStatus"></div>
+            
+            <button type="submit" class="submit-button" id="submitButton" disabled>
+                <i class="fas fa-upload"></i>
+                Upload
+            </button>
+        </form>
+    </div>
+{% endif %}
+
+{% if cv_data %}
+<div class="cv-section">
+    <h2 class="cv-section-title">Informations Personnelles</h2>
+    <div class="cv-info">
+        <div class="cv-info-title">Nom</div>
+        <div class="cv-info-content">{{ cv_data.get('informations_personnelles', {}).get('nom', 'Non spécifié') }}</div>
+    </div>
+    <div class="cv-info">
+        <div class="cv-info-title">Email</div>
+        <div class="cv-info-content">{{ cv_data.get('informations_personnelles', {}).get('email', 'Non spécifié') }}</div>
+    </div>
+    <div class="cv-info">
+        <div class="cv-info-title">Téléphone</div>
+        <div class="cv-info-content">{{ cv_data.get('informations_personnelles', {}).get('numero_de_telephone', 'Non spécifié') }}</div>
+    </div>
+    <div class="cv-info">
+        <div class="cv-info-title">Localisation</div>
+        <div class="cv-info-content">{{ cv_data.get('informations_personnelles', {}).get('localisation', 'Non spécifiée') }}</div>
+    </div>
+</div>
+
+<div class="cv-section">
+    <h2 class="cv-section-title">Compétences</h2>
+    {% if cv_data.get('compétences') %}
+        {% if cv_data.compétences.get('hard_skills') %}
+        <div class="cv-info">
+            <div class="cv-info-title">Compétences Techniques</div>
+            <div class="cv-info-content">
+                {% for skill in cv_data.compétences.hard_skills %}
+                    <span class="cv-tag">{{ skill }}</span>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        
+        {% if cv_data.compétences.get('soft_skills') %}
+        <div class="cv-info">
+            <div class="cv-info-title">Compétences Comportementales</div>
+            <div class="cv-info-content">
+                {% for skill in cv_data.compétences.soft_skills %}
+                    <span class="cv-tag">{{ skill }}</span>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    {% else %}
+        <div class="cv-info-content">Aucune compétence renseignée</div>
+    {% endif %}
+</div>
+
+<div class="cv-section">
+    <h2 class="cv-section-title">Expérience Professionnelle</h2>
+    {% if cv_data.get('expériences') %}
+        {% for experience in cv_data.expériences %}
+        <div class="cv-info" style="margin-bottom: 1.5rem;">
+            <div class="cv-info-title">{{ experience.get('Poste', 'Poste non spécifié') }}</div>
+            <div class="cv-info-content">
+                <div><strong>Entreprise :</strong> {{ experience.get('Entreprise', 'Non spécifié') }}</div>
+                <div><strong>Période :</strong> {{ experience.get('start_date', '') }} - {{ experience.get('end_date', '') }}</div>
+
+                {% if experience.get('responsabilités') %}
+                <div style="margin-top: 0.5rem;">
+                    <strong>Responsabilités :</strong>
+                    <ul style="margin-top: 0.5rem; padding-left: 1.5rem;">
+                        {% for resp in experience.responsabilités %}
+                            <li>{{ resp }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="cv-info-content">Aucune expérience professionnelle renseignée</div>
+    {% endif %}
+</div>
+
+<div class="cv-section">
+    <h2 class="cv-section-title">Formation</h2>
+    {% if cv_data.get('formations') %}
+        {% for formation in cv_data.formations %}
+        <div class="cv-info" style="margin-bottom: 1rem;">
+            <div class="cv-info-title">{{ formation.get('degree', 'Diplôme non spécifié') }}</div>
+            <div class="cv-info-content">
+                <div><strong>Établissement :</strong> {{ formation.get('institution', 'Non spécifié') }}</div>
+                <div><strong>Période :</strong> {{ formation.get('start_date', '') }} - {{ formation.get('end_date', '') }}</div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="cv-info-content">Aucune formation renseignée</div>
+    {% endif %}
+</div>
+
+<div class="cv-section">
+    <h2 class="cv-section-title">Projets</h2>
+    {% if cv_data.get('projets') %}
+        {% for project_category, project_list in cv_data.projets.items() %}
+            {% if project_list %}
+                <h3 class="cv-info-title" style="text-transform: capitalize; margin-top: 1.5rem;">{{ project_category }}</h3>
+                {% for projet in project_list %}
+                <div class="cv-info" style="margin-bottom: 1.5rem;">
+                    <div class="cv-info-title" style="font-size: 1rem;">{{ projet.get('title', 'Projet non spécifié') }}</div>
+                    <div class="cv-info-content">
+                        <div><strong>Rôle :</strong> {{ projet.get('role', 'Non spécifié') }}</div>
+                        {% if projet.get('technologies') %}
+                        <div style="margin-top: 0.5rem;">
+                            <strong>Technologies :</strong>
+                            {% for tech in projet.technologies %}
+                                <span class="cv-tag">{{ tech }}</span>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        {% if projet.get('outcomes') %}
+                        <div style="margin-top: 0.5rem;">
+                            <strong>Réalisations :</strong>
+                            <ul style="margin-top: 0.5rem; padding-left: 1.5rem;">
+                                {% for outcome in projet.outcomes %}
+                                    <li>{{ outcome }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            {% endif %}
+        {% endfor %}
+    {% else %}
+        <div class="cv-info-content">Aucun projet renseigné</div>
+    {% endif %}
+</div>
+{% else %}
+<div class="upload-section" style="max-width: 350px; margin-top: -1rem;">
+    <form id="uploadForm" enctype="multipart/form-data">
+        <div class="upload-area" id="dropZone">
+            <i class="fas fa-cloud-upload-alt"></i>
+            <p class="upload-text">Glissez-déposez votre CV ici ou</p>
+            <button type="button" class="upload-button" onclick="document.getElementById('fileInput').click()">
+                <i class="fas fa-folder-open"></i>
+                Parcourir
+            </button>
+            <input type="file" id="fileInput" name="resume" accept=".pdf" style="display: none">
+            <p class="upload-hint">Format accepté : PDF</p>
+        </div>
+        
+        <div class="upload-progress" id="uploadProgress">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+        </div>
+        
+        <div class="upload-status" id="uploadStatus"></div>
+        
+        <button type="submit" class="submit-button" id="submitButton" disabled>
+            <i class="fas fa-upload"></i>
+            Upload
+        </button>
+    </form>
+</div>
+{% endif %}
+
+<script>
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('fileInput');
+const uploadForm = document.getElementById('uploadForm');
+const submitButton = document.getElementById('submitButton');
+const uploadProgress = document.getElementById('uploadProgress');
+const progressFill = document.getElementById('progressFill');
+const uploadStatus = document.getElementById('uploadStatus');
+
+// Gestion du drag & drop
+dropZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    dropZone.style.borderColor = 'var(--primary-color)';
+    dropZone.style.background = '#F9FAFB';
+});
+
+dropZone.addEventListener('dragleave', () => {
+    dropZone.style.borderColor = 'var(--border-color)';
+    dropZone.style.background = 'white';
+});
+
+dropZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropZone.style.borderColor = 'var(--border-color)';
+    dropZone.style.background = 'white';
+    
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+        fileInput.files = files;
+        handleFileSelect();
+    }
+});
+
+// Gestion de la sélection de fichier
+fileInput.addEventListener('change', handleFileSelect);
+
+function handleFileSelect() {
+    const file = fileInput.files[0];
+    if (file) {
+        if (file.type === 'application/pdf') {
+            submitButton.disabled = false;
+            uploadStatus.textContent = `Fichier sélectionné : ${file.name}`;
+            uploadStatus.style.color = '#059669';
+        } else {
+            uploadStatus.textContent = 'Veuillez sélectionner un fichier PDF';
+            uploadStatus.style.color = '#DC2626';
+            submitButton.disabled = true;
+        }
+    }
+}
+
+// Gestion de l'upload
+uploadForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const formData = new FormData(uploadForm);
+    submitButton.disabled = true;
+    uploadProgress.style.display = 'block';
+    uploadStatus.textContent = 'Upload en cours...';
+    
+    try {
+        const response = await fetch('/upload-resume', {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (response.ok) {
+            uploadStatus.textContent = 'Upload réussi !';
+            uploadStatus.style.color = '#059669';
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
+        } else {
+            throw new Error('Erreur lors de l\'upload');
+        }
+    } catch (error) {
+        uploadStatus.textContent = 'Erreur lors de l\'upload';
+        uploadStatus.style.color = '#DC2626';
+        submitButton.disabled = false;
+    }
+});
+
+function viewResume() {
+    // Implement view functionality
+    alert('View resume functionality would open the PDF');
+}
+
+function deleteResume() {
+    if (confirm('Are you sure you want to delete your resume?')) {
+        // Implement delete functionality
+        window.location.reload();
+    }
+}
+</script>
+{% endblock %}

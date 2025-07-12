@@ -1,0 +1,275 @@
+{% extends "base.html" %}
+
+{% block title %}Améliorez vos Entretiens avec Notre Simulateur d'Entretien IA - AIrh{% endblock %}
+
+{% block public_content %}
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+    
+    body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: linear-gradient(180deg, #F3F4F6 0%, #F9FAFB 100%);
+    }
+
+    .navbar {
+        background-color: white;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        padding: 1rem 0;
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+    }
+
+    .navbar-brand {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        text-decoration: none;
+    }
+
+    .logo-icon {
+        width: 80px;
+        height: 80px;
+        object-fit: contain;
+    }
+
+    .landing-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 3rem 1rem;
+    }
+
+    .hero-section {
+        text-align: center;
+        padding: 3rem 0;
+        margin-bottom: 4rem;
+    }
+
+    .hero-title {
+        background: linear-gradient(90deg, var(--primary-color) 30%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        font-size: 3rem;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        line-height: 1.2;
+    }
+
+    .hero-description {
+        color: var(--text-color);
+        font-size: 1.25rem;
+        max-width: 800px;
+        margin: 0 auto 2rem;
+        line-height: 1.6;
+    }
+
+    .cta-button {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1rem 2.5rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+        border: none;
+        border-radius: 0.5rem;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+
+    .cta-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        color: white;
+    }
+
+    .features-section {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 3rem;
+        margin-bottom: 4rem;
+    }
+
+    .feature-card {
+        background: white;
+        border-radius: 1rem;
+        padding: 2.5rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s;
+    }
+
+    .feature-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+    }
+
+    .feature-image {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        margin: 0 auto 1.5rem;
+        display: block;
+        object-fit: cover;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .feature-title {
+        color: var(--primary-color);
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        text-align: center;
+    }
+
+    .feature-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .feature-list li {
+        position: relative;
+        padding-left: 2rem;
+        margin-bottom: 1rem;
+        color: var(--text-color);
+        line-height: 1.6;
+    }
+
+    .feature-list li::before {
+        content: "✓";
+        position: absolute;
+        left: 0;
+        color: var(--primary-color);
+        font-weight: bold;
+        font-size: 1.2rem;
+    }
+
+    .feature-list strong {
+        color: var(--primary-color);
+        font-weight: 600;
+    }
+
+    .footer-section {
+        text-align: center;
+        padding: 3rem 0;
+        color: var(--text-color);
+        border-top: 1px solid var(--border-color);
+        margin-top: 4rem;
+    }
+
+    .footer-text {
+        max-width: 800px;
+        margin: 0 auto 2rem;
+        line-height: 1.6;
+    }
+
+    .footer-links {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .footer-link {
+        padding: 0.75rem 1.5rem;
+        border: 2px solid var(--primary-color);
+        border-radius: 0.5rem;
+        color: var(--primary-color);
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .footer-link:hover {
+        background-color: var(--primary-color);
+        color: white;
+    }
+
+    @media (max-width: 768px) {
+        .hero-title {
+            font-size: 2rem;
+        }
+
+        .hero-description {
+            font-size: 1.1rem;
+        }
+
+        .features-section {
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+    }
+</style>
+
+<nav class="navbar">
+    <div class="container">
+        <div class="navbar-brand">
+            <img src="{{ url_for('static', filename='AIrh_logo.png') }}" alt="AIrh Logo" class="logo-icon">
+        </div>
+        <a href="{{ url_for('login') }}" class="cta-button">
+            <i class="fas fa-sign-in-alt"></i>
+            Se connecter
+        </a>
+    </div>
+</nav>
+
+<div class="landing-container">
+    <section class="hero-section">
+        <h1 class="hero-title">
+            Améliorez vos Entretiens Tech avec Notre Simulateur d'Entretien IA
+        </h1>
+        <p class="hero-description">
+            Nous développons un outil innovant pour aider les candidats et les recruteurs à mieux préparer et mener les entretiens d'embauche dans les domaines Tech. Notre objectif est de créer un simulateur d'entretien intelligent qui offre une expérience pratique et personnalisée.
+        </p>
+    </section>
+
+    <section class="features-section">
+        <div class="feature-card">
+            <img src="{{ url_for('static', filename='candidat.png') }}" alt="Candidat" class="feature-image">
+            <h2 class="feature-title">Pour les Candidats</h2>
+            <ul class="feature-list">
+                <li><strong>Entraînez-vous de manière ciblée :</strong> Nous travaillons à vous proposer des simulations basées sur les compétences clés recherchées dans les offres d'emploi et celles présentes dans votre CV.</li>
+                <li><strong>Recevez des retours constructifs :</strong> Nous souhaitons vous fournir une analyse de vos réponses pour vous aider à identifier vos points forts et les aspects à améliorer.</li>
+                <li><strong>Gagnez en assurance :</strong> Notre but est de vous permettre de vous familiariser avec le format des entretiens et de réduire le stress lié à cette étape cruciale.</li>
+            </ul>
+        </div>
+
+        <div class="feature-card">
+            <img src="{{ url_for('static', filename='recruteur.png') }}" alt="Recruteur" class="feature-image">
+            <h2 class="feature-title">Pour les Recruteurs</h2>
+            <ul class="feature-list">
+                <li><strong>Optimisez votre processus de sélection :</strong> Nous cherchons à vous offrir un outil pour évaluer les candidats de manière plus efficace et structurée.</li>
+                <li><strong>Gagnez du temps dans la présélection :</strong> Nous souhaitons vous aider à identifier rapidement les profils les plus prometteurs pour les postes à pourvoir.</li>
+                <li><strong>Obtenez des informations pertinentes :</strong> Notre objectif est de vous fournir des rapports d'évaluation pour faciliter vos décisions d'embauche.</li>
+            </ul>
+        </div>
+    </section>
+
+    <footer class="footer-section">
+        <p class="footer-text">
+            Nous sommes en phase de développement et nous nous efforçons de créer un outil qui réponde aux besoins réels des candidats et des recruteurs dans le secteur de la data et de l'IA.
+            <br><br>
+            Restez informés des mises à jour et soyez parmi les premiers à tester notre solution !
+        </p>
+        <div class="footer-links">
+            <a href="https://www.linkedin.com/in/loumeau-quentin/" target="_blank" rel="noopener" class="footer-link">
+                <i class="fab fa-linkedin"></i>
+                Me suivre sur LinkedIn
+            </a>
+            <a href="/contact" class="footer-link">
+                <i class="fas fa-envelope"></i>
+                Support
+            </a>
+        </div>
+    </footer>
+</div>
+{% endblock %}

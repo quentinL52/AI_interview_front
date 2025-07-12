@@ -1,0 +1,252 @@
+{% extends "base.html" %}
+
+{% block title %}Feedback - AIrh{% endblock %}
+
+{% block content %}
+<style>
+    .form-container {
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .form-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .form-title {
+        font-size: 2rem;
+        font-weight: 600;
+        color: var(--text-color);
+        margin-bottom: 0.5rem;
+    }
+
+    .form-subtitle {
+        color: #6B7280;
+        font-size: 1rem;
+    }
+
+    .form-card {
+        background: white;
+        border-radius: 0.75rem;
+        padding: 2rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        display: block;
+        font-weight: 500;
+        color: var(--text-color);
+        margin-bottom: 0.5rem;
+    }
+
+    .form-label span {
+        color: #EF4444;
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid var(--border-color);
+        border-radius: 0.375rem;
+        font-size: 1rem;
+        transition: all 0.2s;
+        font-family: inherit;
+    }
+
+    .form-input:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+
+    .form-textarea {
+        min-height: 150px;
+        resize: vertical;
+    }
+
+    .rating-group {
+        display: flex;
+        gap: 1rem;
+        margin-top: 0.5rem;
+    }
+
+    .rating-option {
+        position: relative;
+        flex: 1;
+    }
+
+    .rating-option input[type="radio"] {
+        position: absolute;
+        opacity: 0;
+    }
+
+    .rating-label {
+        display: block;
+        padding: 1rem;
+        text-align: center;
+        border: 2px solid var(--border-color);
+        border-radius: 0.5rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        background: white;
+    }
+
+    .rating-label:hover {
+        border-color: var(--primary-color);
+        background: #F0F4FF;
+    }
+
+    .rating-option input[type="radio"]:checked + .rating-label {
+        border-color: var(--primary-color);
+        background: var(--primary-color);
+        color: white;
+    }
+
+    .rating-number {
+        font-size: 1.5rem;
+        font-weight: 600;
+        display: block;
+        margin-bottom: 0.25rem;
+    }
+
+    .rating-text {
+        font-size: 0.75rem;
+    }
+
+    .form-help {
+        font-size: 0.875rem;
+        color: #6B7280;
+        margin-top: 0.25rem;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin-top: 2rem;
+    }
+
+    .btn {
+        padding: 0.75rem 2rem;
+        border-radius: 0.375rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-primary {
+        background: var(--primary-color);
+        color: white;
+        border: none;
+    }
+
+    .btn-primary:hover {
+        background: var(--secondary-color);
+    }
+
+    .btn-secondary {
+        background: white;
+        color: var(--text-color);
+        border: 1px solid var(--border-color);
+    }
+
+    .btn-secondary:hover {
+        background: #F3F4F6;
+    }
+
+    .feedback-icon {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .feedback-icon i {
+        font-size: 3rem;
+        color: var(--primary-color);
+    }
+</style>
+
+<div class="form-container">
+    <div class="form-header">
+        <h1 class="form-title">Feedback</h1>
+        <p class="form-subtitle">Aidez nous a améliorer votre experience</p>
+    </div>
+
+    <form method="POST" class="form-card">
+        <div class="feedback-icon">
+            <i class="fas fa-comments"></i>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" for="rating">
+                Comment noteriez vous votre experience ? <span>*</span>
+            </label>
+            <div class="rating-group">
+                <div class="rating-option">
+                    <input type="radio" id="rating1" name="rating" value="1" required>
+                    <label class="rating-label" for="rating1">
+                        <span class="rating-number">1</span>
+                        <span class="rating-text">Poor</span>
+                    </label>
+                </div>
+                <div class="rating-option">
+                    <input type="radio" id="rating2" name="rating" value="2" required>
+                    <label class="rating-label" for="rating2">
+                        <span class="rating-number">2</span>
+                        <span class="rating-text">Fair</span>
+                    </label>
+                </div>
+                <div class="rating-option">
+                    <input type="radio" id="rating3" name="rating" value="3" required>
+                    <label class="rating-label" for="rating3">
+                        <span class="rating-number">3</span>
+                        <span class="rating-text">Good</span>
+                    </label>
+                </div>
+                <div class="rating-option">
+                    <input type="radio" id="rating4" name="rating" value="4" required>
+                    <label class="rating-label" for="rating4">
+                        <span class="rating-number">4</span>
+                        <span class="rating-text">Great</span>
+                    </label>
+                </div>
+                <div class="rating-option">
+                    <input type="radio" id="rating5" name="rating" value="5" required>
+                    <label class="rating-label" for="rating5">
+                        <span class="rating-number">5</span>
+                        <span class="rating-text">Excellent</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" for="feedback">
+                Your Feedback <span>*</span>
+            </label>
+            <textarea id="feedback" name="feedback" class="form-input form-textarea" 
+                      placeholder="dites nous ce que vous avez pensé de AIrh ..." required></textarea>
+            <p class="form-help">Votre feedback nous aide a améliorer le service</p>
+        </div>
+
+        <div class="form-actions">
+            <a href="{{ url_for('home') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i>
+                Cancel
+            </a>
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-paper-plane"></i>
+                Submit Feedback
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

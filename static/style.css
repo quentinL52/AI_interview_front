@@ -1,0 +1,1080 @@
+/* JobQuest - Charte graphique 2025 */
+:root {
+  /* Couleurs principales de la charte graphique */
+  --jaune-abeille: #F7BF1B;    /* Couleur principale - Énergie et productivité */
+  --noir: #000000;             /* Texte, contours, détails importants */
+  --blanc: #FFFFFF;            /* Espaces clairs, faciliter la lecture */
+  --blanc-creme: #F5F5F5;      /* Arrière-plans, sections secondaires */
+  --brun-miel: #A0522D;        /* Accent pour touche naturelle et chaleureuse */
+  
+  /* Couleurs dérivées pour éléments interactifs */
+  --jaune-clair: #FFE066;      /* Éléments survolés */
+  --jaune-fonce: #E0A800;      /* Éléments actifs */
+  --gris-sombre: #222222;      /* Arrière-plans secondaires */
+  --gris-clair: #DDDDDD;       /* Bordures légères */
+  --brun-clair: #C68642;       /* Accents secondaires */
+  
+  /* Variables fonctionnelles */
+  --bg-color: var(--blanc-creme);
+  --text-color: var(--noir);
+  --primary-color: var(--jaune-abeille);
+  --secondary-color: var(--brun-miel);
+  --accent-color: var(--jaune-clair);
+  --panel-bg: var(--blanc);
+  --border-color: var(--gris-clair);
+  --shadow-color: rgba(247, 191, 27, 0.3);
+}
+
+@font-face {
+  font-family: 'Montserrat';
+  src: url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  font-family: 'Montserrat', Helvetica, Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  line-height: 1.5;
+  overflow-x: hidden;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* Header */
+.header {
+  background-color: var(--blanc);
+  text-align: center;
+  padding: 20px 0;
+  position: relative;
+  border-bottom: 4px solid var(--primary-color);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.header h1 {
+  color: var(--primary-color);
+  font-size: 2.5rem;
+  margin: 0;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.header p {
+  color: var(--secondary-color);
+  margin-top: 10px;
+  font-size: 1.1rem;
+}
+
+/* Navigation */
+.nav {
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
+  flex-wrap: wrap;
+}
+
+.nav a {
+  display: inline-block;
+  color: var(--text-color);
+  text-decoration: none;
+  margin: 0 15px;
+  padding: 8px 15px;
+  border-bottom: 2px solid transparent;
+  font-weight: 500;
+  transition: all 0.3s;
+}
+
+.nav a:hover {
+  color: var(--primary-color);
+  border-bottom: 2px solid var(--primary-color);
+}
+
+.nav a.active {
+  color: var(--primary-color);
+  border-bottom: 2px solid var(--primary-color);
+  font-weight: 600;
+}
+
+/* User menu */
+.user-menu {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: var(--secondary-color);
+  color: var(--blanc);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.user-avatar:hover {
+  background-color: var(--brun-clair);
+}
+
+.user-dropdown {
+  position: absolute;
+  right: 0;
+  top: 50px;
+  background-color: var(--blanc);
+  border: 1px solid var(--border-color);
+  border-radius: 5px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  padding: 10px 0;
+  min-width: 200px;
+  display: none;
+  z-index: 100;
+}
+
+.user-menu:hover .user-dropdown {
+  display: block;
+}
+
+.user-dropdown a {
+  display: block;
+  padding: 10px 15px;
+  color: var(--text-color);
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.user-dropdown a:hover {
+  background-color: var(--blanc-creme);
+  color: var(--primary-color);
+}
+
+/* Content Panels */
+.panel {
+  background-color: var(--panel-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 25px;
+  margin: 20px 0;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+}
+
+.panel h2 {
+  color: var(--text-color);
+  margin-top: 0;
+  font-weight: 600;
+  position: relative;
+  padding-bottom: 10px;
+}
+
+.panel h2:after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 50px;
+  height: 3px;
+  background-color: var(--primary-color);
+}
+
+/* Buttons */
+.btn {
+  display: inline-block;
+  padding: 10px 20px;
+  margin: 10px 0;
+  font-family: 'Montserrat', Helvetica, Arial, sans-serif;
+  font-size: 1rem;
+  font-weight: 500;
+  text-align: center;
+  text-decoration: none;
+  color: var(--noir);
+  background-color: var(--primary-color);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.btn:hover {
+  background-color: var(--jaune-clair);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
+}
+
+.btn-secondary {
+  background-color: var(--secondary-color);
+  color: var(--blanc);
+}
+
+.btn-secondary:hover {
+  background-color: var(--brun-clair);
+}
+
+.btn-outline {
+  background-color: transparent;
+  border: 2px solid var(--primary-color);
+  color: var(--primary-color);
+}
+
+.btn-outline:hover {
+  background-color: var(--primary-color);
+  color: var(--noir);
+}
+
+/* Forms */
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--text-color);
+  font-weight: 500;
+}
+
+.form-control {
+  width: 100%;
+  padding: 12px;
+  font-family: 'Montserrat', Helvetica, Arial, sans-serif;
+  font-size: 1rem;
+  background-color: var(--blanc);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  color: var(--text-color);
+  transition: all 0.2s;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(247, 191, 27, 0.25);
+}
+
+/* File Upload */
+.file-upload {
+  position: relative;
+  display: inline-block;
+  margin: 10px 0;
+}
+
+.file-upload input[type="file"] {
+  position: absolute;
+  left: 0;
+  top: 0;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+
+.file-upload-label {
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: var(--blanc);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  color: var(--text-color);
+  font-family: 'Montserrat', Helvetica, Arial, sans-serif;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.file-upload:hover .file-upload-label {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+/* Job Cards */
+.job-card {
+  background-color: var(--blanc);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 20px;
+  margin-bottom: 20px;
+  transition: all 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+
+.job-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  border-color: var(--primary-color);
+}
+
+.job-card:before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background-color: var(--primary-color);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.job-card:hover:before {
+  opacity: 1;
+}
+
+.job-card h3 {
+  color: var(--text-color);
+  margin-top: 0;
+  font-weight: 600;
+}
+
+.job-card p {
+  color: var(--text-color);
+  margin-bottom: 10px;
+}
+
+.job-company {
+  color: var(--secondary-color);
+  font-weight: 500;
+  margin-bottom: 5px;
+}
+
+.job-details {
+  margin-top: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.job-meta {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 10px;
+}
+
+.job-meta-item {
+  display: flex;
+  align-items: center;
+  font-size: 0.9rem;
+  color: var(--gris-sombre);
+}
+
+.job-meta-item i {
+  margin-right: 5px;
+  color: var(--primary-color);
+}
+
+/* Carousel */
+.carousel {
+  position: relative;
+  margin: 30px 0;
+  overflow: hidden;
+}
+
+.carousel-container {
+  display: flex;
+  transition: transform 0.5s ease-in-out;
+}
+
+.carousel-slide {
+  min-width: 100%;
+  padding: 0 10px;
+  box-sizing: border-box;
+}
+
+.carousel-arrows {
+  position: absolute;
+  width: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  justify-content: space-between;
+  padding: 0 10px;
+}
+
+.carousel-arrow {
+  background-color: var(--blanc);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.carousel-arrow:hover {
+  background-color: var(--primary-color);
+  color: var(--blanc);
+}
+
+.carousel-dots {
+  display: flex;
+  justify-content: center;
+  margin-top: 15px;
+}
+
+.carousel-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: var(--gris-clair);
+  margin: 0 5px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.carousel-dot.active {
+  background-color: var(--primary-color);
+  transform: scale(1.2);
+}
+
+/* Chat Interface */
+.chat-container {
+  height: 400px;
+  overflow-y: auto;
+  padding: 15px;
+  background-color: var(--blanc);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  margin-bottom: 15px;
+}
+
+.chat-message {
+  margin-bottom: 15px;
+  padding: 12px;
+  border-radius: 8px;
+  max-width: 80%;
+  position: relative;
+}
+
+.user-message {
+  background-color: rgba(247, 191, 27, 0.1);
+  border-left: 3px solid var(--primary-color);
+  margin-left: auto;
+}
+
+.bot-message {
+  background-color: rgba(160, 82, 45, 0.1);
+  border-left: 3px solid var(--secondary-color);
+  margin-right: auto;
+}
+
+.chat-input {
+  display: flex;
+}
+
+.chat-input input {
+  flex: 1;
+  padding: 12px;
+  font-family: 'Montserrat', Helvetica, Arial, sans-serif;
+  font-size: 1rem;
+  background-color: var(--blanc);
+  border: 1px solid var(--border-color);
+  border-radius: 4px 0 0 4px;
+  color: var(--text-color);
+}
+
+.chat-input button {
+  padding: 12px 20px;
+  background-color: var(--primary-color);
+  border: none;
+  border-radius: 0 4px 4px 0;
+  color: var(--noir);
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.chat-input button:hover {
+  background-color: var(--jaune-clair);
+}
+
+/* Pagination */
+.pagination {
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
+}
+
+.pagination button {
+  margin: 0 5px;
+  padding: 8px 15px;
+  background-color: var(--blanc);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  color: var(--text-color);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.pagination button:hover:not(:disabled) {
+  background-color: var(--primary-color);
+  color: var(--noir);
+  border-color: var(--primary-color);
+}
+
+.pagination button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination button.active {
+  background-color: var(--primary-color);
+  color: var(--noir);
+  border-color: var(--primary-color);
+  font-weight: 500;
+}
+
+/* Loading Effect */
+.loading {
+  display: inline-block;
+  position: relative;
+  width: 64px;
+  height: 64px;
+}
+
+.loading:after {
+  content: " ";
+  display: block;
+  width: 46px;
+  height: 46px;
+  margin: 8px;
+  border-radius: 50%;
+  border: 5px solid var(--primary-color);
+  border-color: var(--primary-color) transparent var(--secondary-color) transparent;
+  animation: loading 1.2s linear infinite;
+}
+
+@keyframes loading {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Progress Bar */
+.progress-container {
+  background-color: var(--blanc-creme);
+  border-radius: 4px;
+  height: 20px;
+  width: 100%;
+  margin: 10px 0;
+  overflow: hidden;
+}
+
+.progress-bar {
+  background-color: var(--primary-color);
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.3s ease-in-out;
+}
+
+/* Level Badge */
+.level-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  background-color: var(--primary-color);
+  color: var(--noir);
+  border-radius: 50%;
+  font-weight: bold;
+  margin-right: 10px;
+}
+
+/* Achievement Cards */
+.achievement-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.achievement-card {
+  background-color: var(--blanc);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 15px;
+  text-align: center;
+  transition: all 0.3s;
+}
+
+.achievement-card.unlocked {
+  border-color: var(--primary-color);
+  box-shadow: 0 5px 15px rgba(247, 191, 27, 0.2);
+}
+
+.achievement-card.locked {
+  opacity: 0.7;
+  filter: grayscale(1);
+}
+
+.achievement-icon {
+  font-size: 2rem;
+  color: var(--gris-clair);
+  margin-bottom: 10px;
+}
+
+.achievement-card.unlocked .achievement-icon {
+  color: var(--primary-color);
+}
+
+.achievement-name {
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+
+.achievement-desc {
+  font-size: 0.9rem;
+  color: var(--gris-sombre);
+}
+
+.achievement-xp {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 3px 8px;
+  background-color: rgba(247, 191, 27, 0.1);
+  border-radius: 4px;
+  font-size: 0.8rem;
+  color: var(--secondary-color);
+}
+
+/* User Profile */
+.profile-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.profile-avatar {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background-color: var(--primary-color);
+  color: var(--noir);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin-right: 20px;
+}
+
+.profile-info {
+  flex: 1;
+}
+
+.profile-name {
+  font-size: 1.8rem;
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+
+.profile-email {
+  color: var(--gris-sombre);
+  margin-bottom: 10px;
+}
+
+.profile-stats {
+  display: flex;
+  gap: 20px;
+}
+
+.stat-item {
+  text-align: center;
+  padding: 5px 15px;
+  background-color: var(--blanc-creme);
+  border-radius: 4px;
+}
+
+.stat-value {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--primary-color);
+}
+
+.stat-label {
+  font-size: 0.8rem;
+  color: var(--gris-sombre);
+}
+
+.profile-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 20px;
+}
+
+.profile-tab {
+  padding: 10px 20px;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: all 0.3s;
+}
+
+.profile-tab.active {
+  border-bottom-color: var(--primary-color);
+  color: var(--primary-color);
+  font-weight: 500;
+}
+
+.profile-tab:hover:not(.active) {
+  border-bottom-color: var(--gris-clair);
+}
+
+.profile-section {
+  display: none;
+}
+
+.profile-section.active {
+  display: block;
+}
+
+/* Skills and experience */
+.skills-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.skill-badge {
+  padding: 5px 12px;
+  background-color: rgba(247, 191, 27, 0.1);
+  border-radius: 20px;
+  font-size: 0.9rem;
+}
+
+.experience-item {
+  margin-bottom: 20px;
+  position: relative;
+  padding-left: 20px;
+}
+
+.experience-item:before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 5px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: var(--primary-color);
+}
+
+.experience-item:after {
+  content: '';
+  position: absolute;
+  left: 5px;
+  top: 15px;
+  width: 1px;
+  height: calc(100% - 15px);
+  background-color: var(--primary-color);
+  opacity: 0.5;
+}
+
+.experience-title {
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+
+.experience-company {
+  color: var(--secondary-color);
+  margin-bottom: 5px;
+}
+
+.experience-date {
+  font-size: 0.8rem;
+  color: var(--gris-sombre);
+  margin-bottom: 5px;
+}
+
+.experience-description {
+  margin-top: 10px;
+}
+
+/* Activity feed */
+.activity-feed {
+  margin-top: 20px;
+}
+
+.activity-item {
+  display: flex;
+  align-items: center;
+  padding: 15px 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.activity-icon {
+  width: 40px;
+  height: 40px;
+  background-color: rgba(247, 191, 27, 0.1);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary-color);
+  margin-right: 15px;
+}
+
+.activity-content {
+  flex: 1;
+}
+
+.activity-text {
+  margin-bottom: 5px;
+}
+
+.activity-date {
+  font-size: 0.8rem;
+  color: var(--gris-sombre);
+}
+
+/* Login Page */
+.login-container {
+  max-width: 500px;
+  margin: 50px auto;
+  padding: 30px;
+  background-color: var(--blanc);
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.login-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.login-header h2 {
+  font-size: 1.8rem;
+  margin-bottom: 10px;
+}
+
+.login-header p {
+  color: var(--gris-sombre);
+}
+
+.social-login {
+  margin-bottom: 25px;
+}
+
+.linkedin-login-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 12px;
+  background-color: #0077B5;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.linkedin-login-btn i {
+  margin-right: 10px;
+}
+
+.linkedin-login-btn:hover {
+  background-color: #006397;
+}
+
+.login-divider {
+  display: flex;
+  align-items: center;
+  margin: 20px 0;
+}
+
+.login-divider:before,
+.login-divider:after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background-color: var(--border-color);
+}
+
+.login-divider span {
+  padding: 0 10px;
+  color: var(--gris-sombre);
+  font-size: 0.9rem;
+}
+
+/* Flash messages */
+.flash-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+}
+
+.flash {
+  padding: 15px 20px;
+  margin-bottom: 10px;
+  border-radius: 4px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  animation: slideIn 0.3s ease-out forwards;
+}
+
+.flash-success {
+  background-color: #d4edda;
+  color: #155724;
+  border-left: 4px solid #28a745;
+}
+
+.flash-error {
+  background-color: #f8d7da;
+  color: #721c24;
+  border-left: 4px solid #dc3545;
+}
+
+.flash-warning {
+  background-color: #fff3cd;
+  color: #856404;
+  border-left: 4px solid #ffc107;
+}
+
+.flash-info {
+  background-color: #d1ecf1;
+  color: #0c5460;
+  border-left: 4px solid #17a2b8;
+}
+
+.flash-icon {
+  margin-right: 10px;
+}
+
+.flash-close {
+  margin-left: 10px;
+  cursor: pointer;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Footer */
+.footer {
+  text-align: center;
+  padding: 30px 0;
+  margin-top: 40px;
+  background-color: var(--blanc);
+  border-top: 1px solid var(--border-color);
+  color: var(--gris-sombre);
+}
+
+.footer-logo {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  margin-bottom: 15px;
+}
+
+.footer-links {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.footer-links a {
+  color: var(--text-color);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.footer-links a:hover {
+  color: var(--primary-color);
+}
+
+.footer-social {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.social-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: var(--blanc-creme);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s;
+}
+
+.social-icon:hover {
+  background-color: var(--primary-color);
+  color: var(--blanc);
+}
+
+.footer-copyright {
+  font-size: 0.9rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .container {
+    padding: 15px;
+  }
+  
+  .header h1 {
+    font-size: 2rem;
+  }
+  
+  .nav a {
+    margin: 5px;
+  }
+  
+  .profile-header {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .profile-avatar {
+    margin-right: 0;
+    margin-bottom: 15px;
+  }
+  
+  .profile-stats {
+    justify-content: center;
+  }
+  
+  .achievement-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  }
+  
+  .job-card {
+    padding: 15px;
+  }
+  
+  .chat-container {
+    height: 300px;
+  }
+}
