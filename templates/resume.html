@@ -175,6 +175,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const loadingSpinner = document.getElementById('loadingSpinner');
     const cvDataContainer = document.getElementById('cvDataContainer');
     const deleteButton = document.getElementById('deleteButton');
+
     ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
         dropZone.addEventListener(eventName, e => { e.preventDefault(); e.stopPropagation(); });
     });
@@ -184,10 +185,12 @@ document.addEventListener('DOMContentLoaded', function () {
     ['dragleave', 'drop'].forEach(eventName => {
         dropZone.addEventListener(eventName, () => dropZone.style.borderColor = '#e5e7eb');
     });
+
     dropZone.addEventListener('drop', (e) => {
         fileInput.files = e.dataTransfer.files;
         handleFileSelect();
     });
+
     dropZone.addEventListener('click', () => fileInput.click());
     fileInput.addEventListener('change', handleFileSelect);
 
@@ -206,6 +209,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
     }
+
     uploadForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const formData = new FormData(uploadForm);
@@ -217,15 +221,30 @@ document.addEventListener('DOMContentLoaded', function () {
 
         try {
             const response = await fetch("{{ url_for('upload_resume') }}", { method: 'POST', body: formData });
-            if (response.ok) {
-                uploadStatus.textContent = 'Analyse terminée ! Rechargement de la page...';
-                uploadStatus.className = 'mt-2 text-center small text-success';
-                setTimeout(() => window.location.reload(), 1500);
-            } else {
-                const errorData = await response.json();
-                throw new Error(errorData.error || 'Une erreur est survenue lors de l\'analyse.');
+            
+            // --- BLOC DE CORRECTION ---
+            // Vérifie si la réponse est bien du JSON avant de la traiter
+            const contentType = response.headers.get("content-type");
+            if (!response.ok || !contentType || !contentType.includes("application/json")) {
+                // Si la réponse n'est pas OK ou n'est pas du JSON, c'est probablement une redirection vers la page de login
+                // à cause d'une session expirée.
+                uploadStatus.textContent = 'Session expirée. Reconnexion nécessaire...';
+                uploadStatus.className = 'mt-2 text-center small text-warning';
+                // Recharge la page, ce qui redirigera l'utilisateur vers la page de connexion
+                setTimeout(() => window.location.reload(), 2000);
+                // On arrête l'exécution pour ne pas tenter de lire la réponse HTML
+                return; 
             }
+            // --- FIN DU BLOC DE CORRECTION ---
+
+            // Si le code arrive ici, la réponse est valide et OK
+            await response.json(); // On peut lire le JSON en toute sécurité
+            uploadStatus.textContent = 'Analyse terminée ! Rechargement de la page...';
+            uploadStatus.className = 'mt-2 text-center small text-success';
+            setTimeout(() => window.location.reload(), 1500);
+
         } catch (error) {
+            // Cette partie gère les erreurs réseau ou autres problèmes imprévus
             uploadStatus.textContent = `Erreur : ${error.message}`;
             uploadStatus.className = 'mt-2 text-center small text-danger';
             submitButton.disabled = false;
@@ -233,6 +252,7 @@ document.addEventListener('DOMContentLoaded', function () {
             cvDataContainer.classList.remove('loading');
         }
     });
+
     if(deleteButton) {
         deleteButton.addEventListener('click', async () => {
             if (!confirm('Êtes-vous sûr de vouloir supprimer votre CV ? Cette action est irréversible.')) {
