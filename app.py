@@ -6,20 +6,21 @@ from flask_sqlalchemy import SQLAlchemy
 import requests
 from datetime import datetime
 from dotenv import load_dotenv
+#-authentification-
 import secrets
 from werkzeug.utils import secure_filename
 from authlib.integrations.flask_client import OAuth
+
 import json
 from functools import wraps
+
 from bson import ObjectId
 import traceback
-
-# Imports locaux
+#-configurations-
 from data.mongodb_candidats.mongo_utils import MongoManager
 from config.external_services import fetch_job_offers
 from configs import Config
-
-# Gestion des mails
+# -gestion des mails-
 import smtplib
 import ssl
 from email.mime.multipart import MIMEMultipart
@@ -29,39 +30,20 @@ load_dotenv()
 
 app = Flask(__name__)
 logging.basicConfig(level=logging.INFO)
-
-# Configuration adaptée pour Render
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", secrets.token_hex(16))
+app.config.update(
+    SESSION_COOKIE_SAMESITE='Lax',
+    SESSION_COOKIE_SECURE=False
+)
 
-# Configuration pour production
-if os.environ.get('RENDER'):
-    app.config.update(
-        SESSION_COOKIE_SAMESITE='Lax',
-        SESSION_COOKIE_SECURE=True,  # HTTPS obligatoire sur Render
-        SESSION_COOKIE_HTTPONLY=True
-    )
-else:
-    app.config.update(
-        SESSION_COOKIE_SAMESITE='Lax',
-        SESSION_COOKIE_SECURE=False
-    )
-
-# Configuration uploads - Render supporte le stockage temporaire
-UPLOAD_FOLDER = '/tmp' if os.environ.get('RENDER') else 'uploads'
+UPLOAD_FOLDER = 'uploads'
 ALLOWED_EXTENSIONS = {'pdf'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 
-# Configuration base de données
-# Render fournit une variable DATABASE_URL automatiquement pour PostgreSQL
-database_url = os.environ.get('DATABASE_URL')
-if database_url and database_url.startswith('postgres://'):
-    # Render utilise postgres:// mais SQLAlchemy 1.4+ nécessite postgresql://
-    database_url = database_url.replace('postgres://', 'postgresql://', 1)
-
-app.config['SQLALCHEMY_DATABASE_URI'] = database_url
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
@@ -214,6 +196,24 @@ def upload_resume():
         logging.error(f"Erreur critique lors du traitement du CV : {e}", exc_info=True)
         flash('Une erreur serveur est survenue.', 'danger')
         return jsonify({'error': f'Une erreur serveur est survenue : {e}'}), 500
+    
+@app.route('/delete_resume', methods=['POST'])
+@login_required
+def delete_resume():
+    if not g.user.candidate_mongo_id:
+        return jsonify({'error': 'Aucun CV à supprimer.'}), 404
+    try:
+        mongo_manager = MongoManager()
+        mongo_manager.delete_profile_by_id(g.user.candidate_mongo_id)
+        mongo_manager.close_connection()
+        g.user.candidate_mongo_id = None
+        db.session.commit()
+        flash('Votre CV a été supprimé avec succès.', 'success')
+        return jsonify({'success': True, 'message': 'CV supprimé.'}), 200
+    except Exception as e:
+        logging.error(f"Erreur lors de la suppression du CV : {e}")
+        flash('Une erreur est survenue lors de la suppression.', 'danger')
+        return jsonify({'error': 'Erreur interne du serveur.'}), 500
 
 @app.route('/jobs')
 @login_required
@@ -289,10 +289,102 @@ def interview_ai():
         logging.error(f"Erreur critique dans GET /interview-ai: {error_details}")
         return "Une erreur interne est survenue lors du chargement de la page.", 500
 
+'''
+@app.route('/interview-ai', methods=['GET', 'POST'])
+@login_required
+def interview_ai():
+    MODEL_API_URL = Config.MODEL_API_URL
+    if request.method == 'POST':
+        try:
+            data = request.get_json()
+            messages_from_client = data.get('messages', [])
+            job_id = data.get('job_id')
+
+            if not job_id:
+                return jsonify({'error': 'Donnée manquante : job_id'}), 400
+            mongo_manager = MongoManager()
+            cv_document = mongo_manager.get_profile_by_id(g.user.candidate_mongo_id)
+            
+            if not cv_document:
+                mongo_manager.close_connection()
+                return jsonify({'error': 'CV non trouvé pour cet utilisateur.'}), 404
+
+
+            jobs = fetch_job_offers()
+            job_offer = next((job for job in jobs if job.get('id') == job_id), None)
+            
+            if not job_offer:
+                mongo_manager.close_connection()
+                return jsonify({'error': 'Offre d\'emploi introuvable.'}), 404
+            
+            conversation_history = mongo_manager.load_conversation_history(g.user.google_id, job_id) or []
+            payload = {
+                "cv_document": cv_document,
+                "job_offer": job_offer,
+                "messages": messages_from_client, 
+                "conversation_history": conversation_history
+            }
+            
+            api_response = requests.post(f"{MODEL_API_URL}/simulate-interview/", json=payload)
+            api_response.raise_for_status()
+            response_data = api_response.json()
+            ai_message = response_data.get("response")
+            updated_history = messages_from_client + [{"role": "assistant", "content": ai_message}]
+            google_id = g.user.google_id
+            mongo_manager.save_conversation_history(google_id, job_id, updated_history)
+            logging.info(f"Historique de conversation sauvegardé pour l'utilisateur {google_id} et l'offre {job_id}")
+            
+            mongo_manager.close_connection()
+            return jsonify({"response": ai_message})
+
+        except requests.exceptions.RequestException as e:
+            logging.error(f"Erreur de communication avec l'API du modèle: {e}")
+            return jsonify({'error': "Impossible de contacter le service de simulation."}), 503
+        except Exception as e:
+            error_details = traceback.format_exc()
+            logging.error(f"Erreur critique inattendue dans POST /interview-ai: {error_details}")
+            return jsonify({'error': "Une erreur interne est survenue."}), 500
+    try:
+        job_id = request.args.get('job_id')
+        if not job_id:
+            return "Erreur: Le paramètre 'job_id' est manquant dans l'URL.", 400
+        jobs = fetch_job_offers()
+        job_offer = next((job for job in jobs if job.get('id') == job_id), None)
+        if not job_offer:
+            return "Offre d'emploi non trouvée", 404
+        mongo_manager = MongoManager()
+        conversation_history = mongo_manager.load_conversation_history(g.user.google_id, job_id)
+        mongo_manager.close_connection()
+        return render_template('interview_ai.html', job_offer=job_offer, conversation_history=conversation_history)
+    except Exception as e:
+        error_details = traceback.format_exc()
+        logging.error(f"Erreur critique dans GET /interview-ai: {error_details}")
+        return "Une erreur interne est survenue lors du chargement de la page.", 500
+'''
+
 @app.route('/settings')
 @login_required
 def settings():
     return render_template('settings.html')
+
+'''
+@app.route('/contact', methods=['GET', 'POST'])
+def contact():
+    if request.method == 'POST':
+        name = request.form.get('name')
+        from_email = request.form.get('email')
+        subject = request.form.get('subject')
+        message_body = request.form.get('message')
+        sender_email = Config.GMAIL_USER
+        password = Config.GMAIL_PASSWORD
+        receiver_email = sender_email 
+        
+        flash("Merci pour votre message !", "success")
+        if not sender_email or not password:
+            flash("Le service d'email n'est pas configuré sur le serveur.", "danger")
+            return redirect(url_for('contact'))
+    return render_template('contact.html')
+'''
 
 @app.route('/contact', methods=['GET', 'POST'])
 def contact():
@@ -336,14 +428,8 @@ def page_not_found(e):
 def internal_server_error(e):
     return render_template('500.html'), 500
 
-# Initialisation de la base de données
-with app.app_context():
-    try:
-        db.create_all()
-        logging.info("Base de données initialisée avec succès")
-    except Exception as e:
-        logging.error(f"Erreur lors de l'initialisation de la base de données: {e}")
-
 if __name__ == '__main__':
+    with app.app_context():
+        db.create_all() 
     port = int(os.environ.get('PORT', 5000))
-    app.run(debug=False, host='0.0.0.0', port=port)
+    app.run(debug=True, host='0.0.0.0', port=port)
