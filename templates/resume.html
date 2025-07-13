@@ -1,595 +1,258 @@
 {% extends "base.html" %}
 
-{% block title %}Resume - AIrh{% endblock %}
+{% block title %}Mon CV - AIrh{% endblock %}
 
 {% block content %}
 <style>
-    .page-title {
-        font-size: 2rem;
-        font-weight: 600;
-        color: var(--text-color);
-        margin-bottom: 2rem;
+    #loadingSpinner {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 10;
     }
 
-    .upload-container {
-        background: white;
-        border-radius: 0.75rem;
-        padding: 2rem;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    #cvDataContainer.loading {
+        opacity: 0.3;
+        pointer-events: none;
     }
 
-    .upload-section {
-        background: white;
-        border-radius: 0.75rem;
-        padding: 1rem;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        margin-bottom: 2rem;
-        max-width: 400px;
-        margin-left: auto;
-        margin-right: auto;
-        margin-top: -2rem;
-    }
-
-    .upload-header {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        margin-bottom: 0.75rem;
-    }
-
-    .upload-icon {
-        width: 32px;
-        height: 32px;
-        background: #E0E7FF;
-        border-radius: 0.5rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: var(--primary-color);
-        font-size: 1rem;
-    }
-
-    .upload-title {
-        font-size: 1rem;
-        font-weight: 600;
-        color: var(--text-color);
-        margin: 0;
-    }
-
+   
     .upload-area {
-        border: 2px dashed var(--border-color);
+        border: 2px dashed #e5e7eb; 
         border-radius: 0.5rem;
-        padding: 1rem;
+        padding: 2rem;
         text-align: center;
         cursor: pointer;
         transition: all 0.2s;
+        background-color: #f9fafb;
     }
 
     .upload-area:hover {
-        border-color: var(--primary-color);
-        background: #F9FAFB;
-    }
-
-    .upload-area i {
-        font-size: 1.5rem;
-        color: #9CA3AF;
-        margin-bottom: 0.5rem;
-    }
-
-    .upload-text {
-        color: #6B7280;
-        margin-bottom: 0.35rem;
-        font-size: 0.9rem;
-    }
-
-    .upload-hint {
-        font-size: 0.8rem;
-        color: #9CA3AF;
-        margin-top: 0.5rem;
-    }
-
-    .upload-button {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.35rem;
-        padding: 0.25rem 0.5rem;
-        background: var(--primary-color);
-        color: white;
-        border: none;
-        border-radius: 0.375rem;
-        font-weight: 500;
-        font-size: 0.8rem;
-        cursor: pointer;
-        transition: all 0.2s;
-        margin-top: 0.75rem;
-    }
-
-    .upload-button:hover {
-        background: var(--secondary-color);
-    }
-
-    .upload-button:disabled {
-        background: #9CA3AF;
-        cursor: not-allowed;
-    }
-
-    .uploaded-file {
-        background: white;
-        border: 1px solid var(--border-color);
-        border-radius: 0.5rem;
-        padding: 1.5rem;
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        margin-top: 1rem;
-    }
-
-    .file-icon {
-        width: 48px;
-        height: 48px;
-        background: #FEE2E2;
-        border-radius: 0.375rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #DC2626;
-        font-size: 1.5rem;
-    }
-
-    .file-info {
-        flex: 1;
-    }
-
-    .file-name {
-        font-weight: 600;
-        color: var(--text-color);
-        margin-bottom: 0.25rem;
-    }
-
-    .file-date {
-        font-size: 0.875rem;
-        color: #6B7280;
-    }
-
-    .file-actions {
-        display: flex;
-        gap: 0.5rem;
-    }
-
-    .action-button {
-        padding: 0.5rem 1rem;
-        background: white;
-        border: 1px solid var(--border-color);
-        border-radius: 0.375rem;
-        color: var(--text-color);
-        font-size: 0.875rem;
-        font-weight: 500;
-        cursor: pointer;
-        transition: all 0.2s;
-    }
-
-    .action-button:hover {
-        background: #F3F4F6;
-    }
-
-    .action-button.delete {
-        color: #DC2626;
-    }
-
-    .action-button.delete:hover {
-        background: #FEE2E2;
-        border-color: #DC2626;
-    }
-
-    .upload-status {
-        margin-top: 1rem;
-        padding: 1rem;
-        border-radius: 0.375rem;
-        display: none;
-    }
-
-    .upload-status.success {
-        background: #D1FAE5;
-        color: #065F46;
-        display: block;
-    }
-
-    .upload-status.error {
-        background: #FEE2E2;
-        color: #991B1B;
-        display: block;
-    }
-
-    .upload-progress {
-        margin-top: 1rem;
-        display: none;
-    }
-
-    .progress-bar {
-        width: 100%;
-        height: 8px;
-        background: #E5E7EB;
-        border-radius: 4px;
-        overflow: hidden;
-    }
-
-    .progress-fill {
-        height: 100%;
-        background: var(--primary-color);
-        width: 0;
-        transition: width 0.3s;
-    }
-
-    .cv-section {
-        background: white;
-        border-radius: 0.75rem;
-        padding: 2rem;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        margin-top: 2rem;
-    }
-
-    .cv-section-title {
-        font-size: 1.5rem;
-        font-weight: 600;
-        color: var(--text-color);
-        margin-bottom: 1.5rem;
-        padding-bottom: 0.5rem;
-        border-bottom: 2px solid var(--primary-color);
-    }
-
-    .cv-info {
-        margin-bottom: 1.5rem;
-    }
-
-    .cv-info-title {
-        font-weight: 600;
-        color: var(--text-color);
-        margin-bottom: 0.5rem;
-    }
-
-    .cv-info-content {
-        color: #4B5563;
-        line-height: 1.6;
-    }
-
-    .cv-list {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-    }
-
-    .cv-list-item {
-        padding: 0.75rem;
-        border-bottom: 1px solid var(--border-color);
-    }
-
-    .cv-list-item:last-child {
-        border-bottom: none;
-    }
-
-    .cv-tag {
-        display: inline-block;
-        padding: 0.25rem 0.75rem;
-        background: #E5E7EB;
-        border-radius: 1rem;
-        font-size: 0.875rem;
-        color: #4B5563;
-        margin: 0.25rem;
+        border-color: #6366f1; 
+        background: #f0f4ff;
     }
 </style>
 
-<div class="page-header">
-    <h1 class="page-title">Resume</h1>
-</div>
+<div class="container-fluid mt-4">
+    <h1 class="page-title">Gestion du CV</h1>
+    <hr class="mb-4">
 
-{% if resume %}
-    <div class="resume-section">
-        <div class="resume-header">
-            <div class="resume-icon">
-                <i class="fas fa-file-alt"></i>
-            </div>
-            <div>
-                <h3 class="resume-title">{{ resume.filename }}</h3>
-                <p class="resume-date">Uploaded on {{ resume.upload_date.strftime('%B %d, %Y') }}</p>
-            </div>
-        </div>
-        
-        <div class="resume-actions">
-            <button class="action-button" onclick="window.location.href='{{ url_for('download_resume') }}'">
-                <i class="fas fa-download"></i>
-                Download
-            </button>
-            <button class="action-button delete" onclick="deleteResume()">
-                <i class="fas fa-trash"></i>
-                Delete
-            </button>
-        </div>
-    </div>
-{% else %}
-    <div class="upload-section" style="max-width: 350px; margin-top: -1rem;">
-        <form id="uploadForm" enctype="multipart/form-data">
-            <div class="upload-area" id="dropZone">
-                <i class="fas fa-cloud-upload-alt"></i>
-                <p class="upload-text">Glissez-déposez votre CV ici ou</p>
-                <button type="button" class="upload-button" onclick="document.getElementById('fileInput').click()">
-                    <i class="fas fa-folder-open"></i>
-                    Parcourir
-                </button>
-                <input type="file" id="fileInput" name="resume" accept=".pdf" style="display: none">
-                <p class="upload-hint">Format accepté : PDF</p>
-            </div>
-            
-            <div class="upload-progress" id="uploadProgress">
-                <div class="progress-bar">
-                    <div class="progress-fill" id="progressFill"></div>
+    <div class="row">
+        <div class="col-lg-4 mb-4 mb-lg-0">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-primary text-white d-flex align-items-center">
+                    <i class="fas fa-file-upload me-2"></i>
+                    <h5 class="mb-0">Gérer mon CV</h5>
                 </div>
-            </div>
-            
-            <div class="upload-status" id="uploadStatus"></div>
-            
-            <button type="submit" class="submit-button" id="submitButton" disabled>
-                <i class="fas fa-upload"></i>
-                Upload
-            </button>
-        </form>
-    </div>
-{% endif %}
-
-{% if cv_data %}
-<div class="cv-section">
-    <h2 class="cv-section-title">Informations Personnelles</h2>
-    <div class="cv-info">
-        <div class="cv-info-title">Nom</div>
-        <div class="cv-info-content">{{ cv_data.get('informations_personnelles', {}).get('nom', 'Non spécifié') }}</div>
-    </div>
-    <div class="cv-info">
-        <div class="cv-info-title">Email</div>
-        <div class="cv-info-content">{{ cv_data.get('informations_personnelles', {}).get('email', 'Non spécifié') }}</div>
-    </div>
-    <div class="cv-info">
-        <div class="cv-info-title">Téléphone</div>
-        <div class="cv-info-content">{{ cv_data.get('informations_personnelles', {}).get('numero_de_telephone', 'Non spécifié') }}</div>
-    </div>
-    <div class="cv-info">
-        <div class="cv-info-title">Localisation</div>
-        <div class="cv-info-content">{{ cv_data.get('informations_personnelles', {}).get('localisation', 'Non spécifiée') }}</div>
-    </div>
-</div>
-
-<div class="cv-section">
-    <h2 class="cv-section-title">Compétences</h2>
-    {% if cv_data.get('compétences') %}
-        {% if cv_data.compétences.get('hard_skills') %}
-        <div class="cv-info">
-            <div class="cv-info-title">Compétences Techniques</div>
-            <div class="cv-info-content">
-                {% for skill in cv_data.compétences.hard_skills %}
-                    <span class="cv-tag">{{ skill }}</span>
-                {% endfor %}
-            </div>
-        </div>
-        {% endif %}
-        
-        {% if cv_data.compétences.get('soft_skills') %}
-        <div class="cv-info">
-            <div class="cv-info-title">Compétences Comportementales</div>
-            <div class="cv-info-content">
-                {% for skill in cv_data.compétences.soft_skills %}
-                    <span class="cv-tag">{{ skill }}</span>
-                {% endfor %}
-            </div>
-        </div>
-        {% endif %}
-    {% else %}
-        <div class="cv-info-content">Aucune compétence renseignée</div>
-    {% endif %}
-</div>
-
-<div class="cv-section">
-    <h2 class="cv-section-title">Expérience Professionnelle</h2>
-    {% if cv_data.get('expériences') %}
-        {% for experience in cv_data.expériences %}
-        <div class="cv-info" style="margin-bottom: 1.5rem;">
-            <div class="cv-info-title">{{ experience.get('Poste', 'Poste non spécifié') }}</div>
-            <div class="cv-info-content">
-                <div><strong>Entreprise :</strong> {{ experience.get('Entreprise', 'Non spécifié') }}</div>
-                <div><strong>Période :</strong> {{ experience.get('start_date', '') }} - {{ experience.get('end_date', '') }}</div>
-
-                {% if experience.get('responsabilités') %}
-                <div style="margin-top: 0.5rem;">
-                    <strong>Responsabilités :</strong>
-                    <ul style="margin-top: 0.5rem; padding-left: 1.5rem;">
-                        {% for resp in experience.responsabilités %}
-                            <li>{{ resp }}</li>
-                        {% endfor %}
-                    </ul>
-                </div>
-                {% endif %}
-            </div>
-        </div>
-        {% endfor %}
-    {% else %}
-        <div class="cv-info-content">Aucune expérience professionnelle renseignée</div>
-    {% endif %}
-</div>
-
-<div class="cv-section">
-    <h2 class="cv-section-title">Formation</h2>
-    {% if cv_data.get('formations') %}
-        {% for formation in cv_data.formations %}
-        <div class="cv-info" style="margin-bottom: 1rem;">
-            <div class="cv-info-title">{{ formation.get('degree', 'Diplôme non spécifié') }}</div>
-            <div class="cv-info-content">
-                <div><strong>Établissement :</strong> {{ formation.get('institution', 'Non spécifié') }}</div>
-                <div><strong>Période :</strong> {{ formation.get('start_date', '') }} - {{ formation.get('end_date', '') }}</div>
-            </div>
-        </div>
-        {% endfor %}
-    {% else %}
-        <div class="cv-info-content">Aucune formation renseignée</div>
-    {% endif %}
-</div>
-
-<div class="cv-section">
-    <h2 class="cv-section-title">Projets</h2>
-    {% if cv_data.get('projets') %}
-        {% for project_category, project_list in cv_data.projets.items() %}
-            {% if project_list %}
-                <h3 class="cv-info-title" style="text-transform: capitalize; margin-top: 1.5rem;">{{ project_category }}</h3>
-                {% for projet in project_list %}
-                <div class="cv-info" style="margin-bottom: 1.5rem;">
-                    <div class="cv-info-title" style="font-size: 1rem;">{{ projet.get('title', 'Projet non spécifié') }}</div>
-                    <div class="cv-info-content">
-                        <div><strong>Rôle :</strong> {{ projet.get('role', 'Non spécifié') }}</div>
-                        {% if projet.get('technologies') %}
-                        <div style="margin-top: 0.5rem;">
-                            <strong>Technologies :</strong>
-                            {% for tech in projet.technologies %}
-                                <span class="cv-tag">{{ tech }}</span>
-                            {% endfor %}
+                <div class="card-body d-flex flex-column">
+                    <form id="uploadForm" enctype="multipart/form-data" class="flex-grow-1">
+                        <div class="upload-area" id="dropZone">
+                            <i class="fas fa-cloud-upload-alt fa-2x text-muted mb-3"></i>
+                            <p class="upload-text mb-2">Glissez-déposez ou cliquez ici</p>
+                            <input type="file" id="fileInput" name="resume" accept=".pdf" class="d-none">
+                            <p class="upload-hint text-muted small mt-3">Format PDF uniquement.</p>
                         </div>
-                        {% endif %}
-                        {% if projet.get('outcomes') %}
-                        <div style="margin-top: 0.5rem;">
-                            <strong>Réalisations :</strong>
-                            <ul style="margin-top: 0.5rem; padding-left: 1.5rem;">
-                                {% for outcome in projet.outcomes %}
-                                    <li>{{ outcome }}</li>
+                        <div id="fileName" class="mt-3 text-center text-success fw-bold"></div>
+                        <div id="uploadStatus" class="mt-2 text-center small"></div>
+                        <div class="d-grid mt-3">
+                            <button type="submit" class="btn btn-primary" id="submitButton" disabled>
+                                <i class="fas fa-cogs me-2"></i>Analyser mon CV
+                            </button>
+                        </div>
+                    </form>
+
+                    {% if user.candidate_mongo_id %}
+                    <hr>
+                    <p class="text-center text-muted small">Un CV est déjà enregistré.</p>
+                    <div class="d-grid">
+                         <button id="deleteButton" class="btn btn-danger">
+                            <i class="fas fa-trash me-2"></i>Supprimer le CV actuel
+                        </button>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                 <div class="card-header d-flex align-items-center">
+                    <i class="fas fa-tasks me-2"></i>
+                    <h5 class="mb-0">Profil Analysé</h5>
+                </div>
+                <div class="card-body" style="position: relative;"> <div id="loadingSpinner" class="text-center d-none">
+                        <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-3 text-muted">Analyse de votre CV en cours, veuillez patienter...</p>
+                    </div>
+
+                    <div id="cvDataContainer">
+                        {% if cv_data %}
+                            <div class="card mb-3">
+                                <div class="card-header"><strong>Informations Personnelles</strong></div>
+                                <div class="card-body">
+                                    <p class="mb-1"><strong>Nom:</strong> {{ cv_data.get('informations_personnelles', {}).get('nom', 'Non spécifié') }}</p>
+                                    <p class="mb-1"><strong>Email:</strong> {{ cv_data.get('informations_personnelles', {}).get('email', 'Non spécifié') }}</p>
+                                    <p class="mb-1"><strong>Téléphone:</strong> {{ cv_data.get('informations_personnelles', {}).get('numero_de_telephone', 'Non spécifié') }}</p>
+                                    <p class="mb-0"><strong>Localisation:</strong> {{ cv_data.get('informations_personnelles', {}).get('localisation', 'Non spécifiée') }}</p>
+                                </div>
+                            </div>
+
+                            <div class="card mb-3">
+                                <div class="card-header"><strong>Compétences</strong></div>
+                                <div class="card-body">
+                                    {% if cv_data.get('compétences', {}).get('hard_skills') %}
+                                        <h6>Compétences Techniques</h6>
+                                        {% for skill in cv_data.compétences.hard_skills %}<span class="badge bg-info me-1 mb-1">{{ skill }}</span>{% endfor %}
+                                    {% else %}
+                                        <p class="text-muted small">Aucune compétence technique trouvée.</p>
+                                    {% endif %}
+
+                                     {% if cv_data.get('compétences', {}).get('soft_skills') %}
+                                        <h6 class="mt-3">Compétences Comportementales</h6>
+                                        {% for skill in cv_data.compétences.soft_skills %}<span class="badge bg-secondary me-1 mb-1">{{ skill }}</span>{% endfor %}
+                                    {% else %}
+                                         <p class="text-muted small mt-2">Aucune compétence comportementale trouvée.</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="card mb-3">
+                                <div class="card-header"><strong>Expériences Professionnelles</strong></div>
+                                <ul class="list-group list-group-flush">
+                                {% for exp in cv_data.get('expériences', []) %}
+                                    <li class="list-group-item">
+                                        <h5>{{ exp.Poste | default('Poste non spécifié') }} <small class="text-muted">chez {{ exp.Entreprise | default('Entreprise non spécifiée') }}</small></h5>
+                                        <p class="mb-1 text-muted">{{ exp.start_date | default('Date de début non spécifiée') }} - {{ exp.end_date | default('Aujourd\'hui') }}</p>
+                                        {% if exp.get('responsabilités') %}
+                                            <ul class="mt-2 mb-0">{% for resp in exp.responsabilités %}<li><small>{{ resp }}</small></li>{% endfor %}</ul>
+                                        {% endif %}
+                                    </li>
+                                {% else %}
+                                    <li class="list-group-item text-muted">Aucune expérience professionnelle trouvée.</li>
                                 {% endfor %}
-                            </ul>
-                        </div>
+                                </ul>
+                            </div>
+                            
+                            <div class="card">
+                                <div class="card-header"><strong>Formations</strong></div>
+                                <ul class="list-group list-group-flush">
+                                {% for form in cv_data.get('formations', []) %}
+                                    <li class="list-group-item">
+                                        <h5>{{ form.degree | default('Diplôme non spécifié') }}</h5>
+                                        <p class="mb-0 text-muted">{{ form.institution | default('Établissement non spécifié') }} ({{ form.start_date | default('') }} - {{ form.end_date | default('') }})</p>
+                                    </li>
+                                {% else %}
+                                    <li class="list-group-item text-muted">Aucune formation trouvée.</li>
+                                {% endfor %}
+                                </ul>
+                            </div>
+
+                        {% else %}
+                            <div class="text-center p-5">
+                                <i class="fas fa-eye-slash fa-3x text-muted mb-3"></i>
+                                <h5 class="text-muted">Aucune donnée à afficher</h5>
+                                <p class="text-muted">Veuillez télécharger un CV pour que notre IA l'analyse.</p>
+                            </div>
                         {% endif %}
                     </div>
                 </div>
-                {% endfor %}
-            {% endif %}
-        {% endfor %}
-    {% else %}
-        <div class="cv-info-content">Aucun projet renseigné</div>
-    {% endif %}
-</div>
-{% else %}
-<div class="upload-section" style="max-width: 350px; margin-top: -1rem;">
-    <form id="uploadForm" enctype="multipart/form-data">
-        <div class="upload-area" id="dropZone">
-            <i class="fas fa-cloud-upload-alt"></i>
-            <p class="upload-text">Glissez-déposez votre CV ici ou</p>
-            <button type="button" class="upload-button" onclick="document.getElementById('fileInput').click()">
-                <i class="fas fa-folder-open"></i>
-                Parcourir
-            </button>
-            <input type="file" id="fileInput" name="resume" accept=".pdf" style="display: none">
-            <p class="upload-hint">Format accepté : PDF</p>
-        </div>
-        
-        <div class="upload-progress" id="uploadProgress">
-            <div class="progress-bar">
-                <div class="progress-fill" id="progressFill"></div>
             </div>
         </div>
-        
-        <div class="upload-status" id="uploadStatus"></div>
-        
-        <button type="submit" class="submit-button" id="submitButton" disabled>
-            <i class="fas fa-upload"></i>
-            Upload
-        </button>
-    </form>
+    </div>
 </div>
-{% endif %}
 
 <script>
-const dropZone = document.getElementById('dropZone');
-const fileInput = document.getElementById('fileInput');
-const uploadForm = document.getElementById('uploadForm');
-const submitButton = document.getElementById('submitButton');
-const uploadProgress = document.getElementById('uploadProgress');
-const progressFill = document.getElementById('progressFill');
-const uploadStatus = document.getElementById('uploadStatus');
-
-// Gestion du drag & drop
-dropZone.addEventListener('dragover', (e) => {
-    e.preventDefault();
-    dropZone.style.borderColor = 'var(--primary-color)';
-    dropZone.style.background = '#F9FAFB';
-});
-
-dropZone.addEventListener('dragleave', () => {
-    dropZone.style.borderColor = 'var(--border-color)';
-    dropZone.style.background = 'white';
-});
-
-dropZone.addEventListener('drop', (e) => {
-    e.preventDefault();
-    dropZone.style.borderColor = 'var(--border-color)';
-    dropZone.style.background = 'white';
-    
-    const files = e.dataTransfer.files;
-    if (files.length > 0) {
-        fileInput.files = files;
+document.addEventListener('DOMContentLoaded', function () {
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+    const uploadForm = document.getElementById('uploadForm');
+    const submitButton = document.getElementById('submitButton');
+    const uploadStatus = document.getElementById('uploadStatus');
+    const fileNameDisplay = document.getElementById('fileName');
+    const loadingSpinner = document.getElementById('loadingSpinner');
+    const cvDataContainer = document.getElementById('cvDataContainer');
+    const deleteButton = document.getElementById('deleteButton');
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, e => { e.preventDefault(); e.stopPropagation(); });
+    });
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropZone.addEventListener(eventName, () => dropZone.style.borderColor = '#6366f1');
+    });
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, () => dropZone.style.borderColor = '#e5e7eb');
+    });
+    dropZone.addEventListener('drop', (e) => {
+        fileInput.files = e.dataTransfer.files;
         handleFileSelect();
+    });
+    dropZone.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', handleFileSelect);
+
+    function handleFileSelect() {
+        const file = fileInput.files[0];
+        if (file) {
+            if (file.type === 'application/pdf') {
+                submitButton.disabled = false;
+                fileNameDisplay.textContent = `Fichier prêt : ${file.name}`;
+                uploadStatus.textContent = '';
+            } else {
+                uploadStatus.textContent = 'Erreur : Veuillez sélectionner un fichier PDF.';
+                uploadStatus.className = 'mt-2 text-center small text-danger';
+                fileNameDisplay.textContent = '';
+                submitButton.disabled = true;
+            }
+        }
     }
-});
+    uploadForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(uploadForm);
+        submitButton.disabled = true;
+        loadingSpinner.classList.remove('d-none');
+        cvDataContainer.classList.add('loading');
+        uploadStatus.textContent = 'Envoi du fichier en cours...';
+        uploadStatus.className = 'mt-2 text-center small text-info';
 
-// Gestion de la sélection de fichier
-fileInput.addEventListener('change', handleFileSelect);
-
-function handleFileSelect() {
-    const file = fileInput.files[0];
-    if (file) {
-        if (file.type === 'application/pdf') {
+        try {
+            const response = await fetch("{{ url_for('upload_resume') }}", { method: 'POST', body: formData });
+            if (response.ok) {
+                uploadStatus.textContent = 'Analyse terminée ! Rechargement de la page...';
+                uploadStatus.className = 'mt-2 text-center small text-success';
+                setTimeout(() => window.location.reload(), 1500);
+            } else {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Une erreur est survenue lors de l\'analyse.');
+            }
+        } catch (error) {
+            uploadStatus.textContent = `Erreur : ${error.message}`;
+            uploadStatus.className = 'mt-2 text-center small text-danger';
             submitButton.disabled = false;
-            uploadStatus.textContent = `Fichier sélectionné : ${file.name}`;
-            uploadStatus.style.color = '#059669';
-        } else {
-            uploadStatus.textContent = 'Veuillez sélectionner un fichier PDF';
-            uploadStatus.style.color = '#DC2626';
-            submitButton.disabled = true;
+            loadingSpinner.classList.add('d-none');
+            cvDataContainer.classList.remove('loading');
         }
-    }
-}
-
-// Gestion de l'upload
-uploadForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    const formData = new FormData(uploadForm);
-    submitButton.disabled = true;
-    uploadProgress.style.display = 'block';
-    uploadStatus.textContent = 'Upload en cours...';
-    
-    try {
-        const response = await fetch('/upload-resume', {
-            method: 'POST',
-            body: formData
+    });
+    if(deleteButton) {
+        deleteButton.addEventListener('click', async () => {
+            if (!confirm('Êtes-vous sûr de vouloir supprimer votre CV ? Cette action est irréversible.')) {
+                return;
+            }
+            try {
+                const response = await fetch("{{ url_for('delete_resume') }}", {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                if (response.ok) {
+                    window.location.reload();
+                } else {
+                    throw new Error('La suppression a échoué.');
+                }
+            } catch (error) {
+                alert(`Erreur : ${error.message}`);
+            }
         });
-        
-        if (response.ok) {
-            uploadStatus.textContent = 'Upload réussi !';
-            uploadStatus.style.color = '#059669';
-            setTimeout(() => {
-                window.location.reload();
-            }, 1000);
-        } else {
-            throw new Error('Erreur lors de l\'upload');
-        }
-    } catch (error) {
-        uploadStatus.textContent = 'Erreur lors de l\'upload';
-        uploadStatus.style.color = '#DC2626';
-        submitButton.disabled = false;
     }
 });
-
-function viewResume() {
-    // Implement view functionality
-    alert('View resume functionality would open the PDF');
-}
-
-function deleteResume() {
-    if (confirm('Are you sure you want to delete your resume?')) {
-        // Implement delete functionality
-        window.location.reload();
-    }
-}
 </script>
 {% endblock %}
