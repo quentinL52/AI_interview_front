@@ -13,7 +13,8 @@ from authlib.integrations.flask_client import OAuth
 
 import json
 from functools import wraps
-
+import logging
+logger = logging.getLogger(__name__)
 from bson import ObjectId
 import traceback
 #-configurations-
@@ -27,6 +28,15 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
 load_dotenv()
+
+class MongoJSONEncoder(json.JSONEncoder):
+    def default(self, o):
+        if isinstance(o, ObjectId):
+            return str(o)
+        if isinstance(o, datetime):
+            return o.isoformat()
+        return super().default(o)
+
 
 app = Flask(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -225,7 +235,7 @@ def jobs():
         logging.error(f"Erreur lors de la récupération des offres d'emploi : {str(e)}")
         flash("Une erreur est survenue lors de la récupération des offres d'emploi.", "danger")
         return render_template('jobs.html', jobs=[])
-    
+
 @app.route('/interview-ai', methods=['GET', 'POST'])
 @login_required
 def interview_ai():
@@ -238,28 +248,50 @@ def interview_ai():
 
             if not job_id:
                 return jsonify({'error': 'Donnée manquante : job_id'}), 400
+            
             mongo_manager = MongoManager()
+            
             cv_document = mongo_manager.get_profile_by_id(g.user.candidate_mongo_id)
             if not cv_document:
                 mongo_manager.close_connection()
-                return jsonify({'error': 'CV non trouvé.'}), 404
+                return jsonify({'response': 'Je ne peux pas commencer car aucun CV n\'a été trouvé.'})
+
             jobs = fetch_job_offers()
             job_offer = next((job for job in jobs if job.get('id') == job_id), None)
             if not job_offer:
                 mongo_manager.close_connection()
-                return jsonify({'error': 'Offre d\'emploi introuvable.'}), 404         
-            conversation_history = mongo_manager.load_conversation_history(g.user.google_id, job_id) or []
-            payload = {
-                "cv_document": cv_document,
-                "job_offer": job_offer,
-                "messages": messages_from_client, 
-                "conversation_history": conversation_history
+                return jsonify({'error': 'Offre d\'emploi introuvable.'}), 404
+            
+            job_offer_formatted = {
+                "entreprise": job_offer.get("entreprise", "Entreprise non spécifiée"),
+                "poste": job_offer.get("poste", "Poste non spécifié"),
+                "description": job_offer.get("description_poste", job_offer.get("description", "Description non disponible")),
+                "mission": job_offer.get("mission", job_offer.get("description", "Mission non spécifiée")),
+                "pole": job_offer.get("pole", job_offer.get("departement", "Pôle non spécifié")),
+                "profil_recherche": job_offer.get("profil_recherche", "Profil recherché non spécifié"),
+                "competences": job_offer.get("competences", job_offer.get("skills_required", "Compétences non spécifiées"))
             }
-            api_response = requests.post(f"{MODEL_API_URL}/simulate-interview/", json=payload)
-            api_response.raise_for_status()
+
+            payload = {
+                "user_id": g.user.google_id,
+                "job_offer_id": job_id,
+                "cv_document": cv_document,
+                "job_offer": job_offer_formatted,
+                "messages": messages_from_client,
+                "conversation_history": messages_from_client
+            }
+
+            encoded_payload = json.dumps(payload, cls=MongoJSONEncoder)
+            headers = {'Content-Type': 'application/json'}
+            api_response = requests.post(
+                f"{MODEL_API_URL}/simulate-interview/",
+                data=encoded_payload,
+                headers=headers
+            )
+            api_response.raise_for_status() 
             response_data = api_response.json()
             ai_message = response_data.get("response")
-            updated_history = conversation_history + messages_from_client + [{"role": "assistant", "content": ai_message}]
+            updated_history = messages_from_client + [{"role": "assistant", "content": ai_message}]
             mongo_manager.save_conversation_history(g.user.google_id, job_id, updated_history)
             
             mongo_manager.close_connection()
@@ -267,124 +299,116 @@ def interview_ai():
 
         except requests.exceptions.RequestException as e:
             logging.error(f"Erreur de communication avec l'API du modèle: {e}")
-            return jsonify({'error': "Impossible de contacter le service de simulation."}), 503
+            if e.response:
+                logging.error(f"Réponse de l'API: {e.response.text}")
+            return jsonify({'response': "Désolé, une erreur de communication avec l'assistant IA est survenue."})
         except Exception as e:
             error_details = traceback.format_exc()
             logging.error(f"Erreur critique inattendue dans POST /interview-ai: {error_details}")
-            return jsonify({'error': "Une erreur interne est survenue."}), 500
+            return jsonify({'response': "Désolé, une erreur interne est survenue."})
     try:
         job_id = request.args.get('job_id')
         if not job_id:
-            return "Erreur: Le paramètre 'job_id' est manquant dans l'URL.", 400
+            flash("Aucune offre d'emploi sélectionnée.", "warning")
+            return redirect(url_for('jobs'))
+        
         jobs = fetch_job_offers()
         job_offer = next((job for job in jobs if job.get('id') == job_id), None)
         if not job_offer:
-            return "Offre d'emploi non trouvée", 404
+            flash("L'offre d'emploi sélectionnée est introuvable.", "danger")
+            return redirect(url_for('jobs'))
+            
         mongo_manager = MongoManager()
         mongo_manager.delete_conversation_history(g.user.google_id, job_id)
         mongo_manager.close_connection()
-        return render_template('interview_ai.html', job_offer=job_offer, conversation_history=[])     
+        
+        return render_template('interview_ai.html', job_offer=job_offer, config=Config)
     except Exception as e:
         error_details = traceback.format_exc()
         logging.error(f"Erreur critique dans GET /interview-ai: {error_details}")
-        return "Une erreur interne est survenue lors du chargement de la page.", 500
+        flash("Une erreur interne est survenue lors du chargement de la page d'entretien.", "danger")
+        return redirect(url_for('home'))
 
-'''
-@app.route('/interview-ai', methods=['GET', 'POST'])
+
+@app.route('/feedbacks')
 @login_required
-def interview_ai():
+def feedbacks():
     MODEL_API_URL = Config.MODEL_API_URL
-    if request.method == 'POST':
-        try:
-            data = request.get_json()
-            messages_from_client = data.get('messages', [])
-            job_id = data.get('job_id')
-
-            if not job_id:
-                return jsonify({'error': 'Donnée manquante : job_id'}), 400
-            mongo_manager = MongoManager()
-            cv_document = mongo_manager.get_profile_by_id(g.user.candidate_mongo_id)
-            
-            if not cv_document:
-                mongo_manager.close_connection()
-                return jsonify({'error': 'CV non trouvé pour cet utilisateur.'}), 404
-
-
-            jobs = fetch_job_offers()
-            job_offer = next((job for job in jobs if job.get('id') == job_id), None)
-            
-            if not job_offer:
-                mongo_manager.close_connection()
-                return jsonify({'error': 'Offre d\'emploi introuvable.'}), 404
-            
-            conversation_history = mongo_manager.load_conversation_history(g.user.google_id, job_id) or []
-            payload = {
-                "cv_document": cv_document,
-                "job_offer": job_offer,
-                "messages": messages_from_client, 
-                "conversation_history": conversation_history
-            }
-            
-            api_response = requests.post(f"{MODEL_API_URL}/simulate-interview/", json=payload)
-            api_response.raise_for_status()
-            response_data = api_response.json()
-            ai_message = response_data.get("response")
-            updated_history = messages_from_client + [{"role": "assistant", "content": ai_message}]
-            google_id = g.user.google_id
-            mongo_manager.save_conversation_history(google_id, job_id, updated_history)
-            logging.info(f"Historique de conversation sauvegardé pour l'utilisateur {google_id} et l'offre {job_id}")
-            
-            mongo_manager.close_connection()
-            return jsonify({"response": ai_message})
-
-        except requests.exceptions.RequestException as e:
-            logging.error(f"Erreur de communication avec l'API du modèle: {e}")
-            return jsonify({'error': "Impossible de contacter le service de simulation."}), 503
-        except Exception as e:
-            error_details = traceback.format_exc()
-            logging.error(f"Erreur critique inattendue dans POST /interview-ai: {error_details}")
-            return jsonify({'error': "Une erreur interne est survenue."}), 500
     try:
-        job_id = request.args.get('job_id')
-        if not job_id:
-            return "Erreur: Le paramètre 'job_id' est manquant dans l'URL.", 400
-        jobs = fetch_job_offers()
-        job_offer = next((job for job in jobs if job.get('id') == job_id), None)
-        if not job_offer:
-            return "Offre d'emploi non trouvée", 404
+        api_response = requests.get(f"{MODEL_API_URL}/feedbacks/{g.user.google_id}")
+        api_response.raise_for_status()
+        feedbacks_data = api_response.json()
+        jobs = fetch_job_offers() 
         mongo_manager = MongoManager()
-        conversation_history = mongo_manager.load_conversation_history(g.user.google_id, job_id)
+
+        for feedback in feedbacks_data:
+            job_offer_id = feedback.get('job_offer_id')
+            job_title = "Offre inconnue"
+            found_job = next((job for job in jobs if job.get('id') == job_offer_id), None)
+            if found_job:
+                job_title = found_job.get('poste', job_title)
+            else:
+                manual_job = mongo_manager.get_job_offer_by_id(job_offer_id)
+                if manual_job:
+                    job_title = manual_job.get('poste', job_title)
+            
+            feedback['job_title'] = job_title
+            if 'timestamp' in feedback:
+                feedback['formatted_timestamp'] = datetime.fromisoformat(feedback['timestamp']).strftime('%d/%m/%Y %H:%M')
+            else:
+                feedback['formatted_timestamp'] = 'Date inconnue'
+        
         mongo_manager.close_connection()
-        return render_template('interview_ai.html', job_offer=job_offer, conversation_history=conversation_history)
+        return render_template('feedbacks.html', feedbacks=feedbacks_data)
+    except requests.exceptions.RequestException as e:
+        logging.error(f"Erreur de communication avec l'API du modèle lors de la récupération des feedbacks: {e}")
+        flash("Impossible de récupérer vos feedbacks pour le moment.", "danger")
+        return render_template('feedbacks.html', feedbacks=[])
     except Exception as e:
-        error_details = traceback.format_exc()
-        logging.error(f"Erreur critique dans GET /interview-ai: {error_details}")
-        return "Une erreur interne est survenue lors du chargement de la page.", 500
-'''
+        logging.error(f"Erreur critique lors de la récupération des feedbacks: {e}", exc_info=True)
+        flash("Une erreur interne est survenue lors de la récupération de vos feedbacks.", "danger")
+        return render_template('feedbacks.html', feedbacks=[])
 
 @app.route('/settings')
 @login_required
 def settings():
     return render_template('settings.html')
 
-'''
-@app.route('/contact', methods=['GET', 'POST'])
-def contact():
-    if request.method == 'POST':
-        name = request.form.get('name')
-        from_email = request.form.get('email')
-        subject = request.form.get('subject')
-        message_body = request.form.get('message')
-        sender_email = Config.GMAIL_USER
-        password = Config.GMAIL_PASSWORD
-        receiver_email = sender_email 
-        
-        flash("Merci pour votre message !", "success")
-        if not sender_email or not password:
-            flash("Le service d'email n'est pas configuré sur le serveur.", "danger")
-            return redirect(url_for('contact'))
-    return render_template('contact.html')
-'''
+@app.route('/feedbacks/<feedback_id>')
+@login_required
+def get_feedback_details(feedback_id):
+    MODEL_API_URL = Config.MODEL_API_URL
+    try:
+        api_response = requests.get(f"{MODEL_API_URL}/feedbacks/{g.user.google_id}/{feedback_id}")
+        api_response.raise_for_status()
+        feedback_data = api_response.json()
+        job_title = "Offre inconnue"
+        jobs = fetch_job_offers()
+        mongo_manager = MongoManager()
+        job_offer_id = feedback_data.get('job_offer_id')
+        found_job = next((job for job in jobs if job.get('id') == job_offer_id), None)
+        if found_job:
+            job_title = found_job.get('poste', job_title)
+        else:
+            manual_job = mongo_manager.get_job_offer_by_id(job_offer_id)
+            if manual_job:
+                job_title = manual_job.get('poste', job_title)
+        mongo_manager.close_connection()
+        feedback_data['job_title'] = job_title
+        if 'timestamp' in feedback_data:
+            feedback_data['formatted_timestamp'] = datetime.fromisoformat(feedback_data['timestamp']).strftime('%d/%m/%Y %H:%M')
+        else:
+            feedback_data['formatted_timestamp'] = 'Date inconnue'
+
+        return render_template('feedback_details.html', feedback=feedback_data)
+    except requests.exceptions.RequestException as e:
+        logging.error(f"Erreur de communication avec l'API du modèle lors de la récupération des détails du feedback: {e}")
+        flash("Impossible de récupérer les détails de ce feedback pour le moment.", "danger")
+        return redirect(url_for('feedbacks'))
+    except Exception as e:
+        logging.error(f"Erreur critique lors de la récupération des détails du feedback: {e}", exc_info=True)
+        flash("Une erreur interne est survenue lors de la récupération des détails du feedback.", "danger")
+        return redirect(url_for('feedbacks'))
 
 @app.route('/contact', methods=['GET', 'POST'])
 def contact():
@@ -419,6 +443,32 @@ def contact():
             server.send_message(msg)
         flash("Merci pour votre message ! Il a bien été envoyé.", "success")
     return render_template('contact.html')
+
+@app.route('/save-analysis', methods=['POST'])
+@login_required
+def save_analysis():
+    data = request.get_json()
+    feedback_content = data.get('feedback_content') 
+    job_offer_id = data.get('job_offer_id')
+
+    if not feedback_content or not job_offer_id:
+        return jsonify({'error': 'Données manquantes'}), 400
+
+    try:
+        mongo_manager = MongoManager()
+        feedback_doc = {
+            "user_google_id": g.user.google_id,
+            "job_id": job_offer_id,
+            "feedback_data": feedback_content,
+            "last_updated": datetime.utcnow(),
+            "status": "completed"
+        }
+        mongo_manager.save_feedback(g.user.google_id, job_offer_id, feedback_content)
+        mongo_manager.close_connection()
+        return jsonify({'success': True}), 200
+    except Exception as e:
+        logging.error(f"Erreur lors de la sauvegarde de l'analyse : {e}")
+        return jsonify({'error': 'Erreur serveur'}), 500
 
 @app.errorhandler(404)
 def page_not_found(e):
