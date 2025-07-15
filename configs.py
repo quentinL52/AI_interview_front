@@ -9,7 +9,7 @@ class Config:
     MONGO_CV_COLLECTION = os.getenv("MONGO_CV_COLLECTION")
     MONGO_INTERVIEW_COLLECTION = os.getenv("MONGO_INTERVIEW_COLLECTION")
     MODEL_API_URL=os.getenv("MODEL_API_URL")
-    MODEL_API_URL = os.environ.get("MODEL_API_URL", "https://quentinl52-interview-agents-api.hf.space")
+    MODEL_API_URL = os.environ.get("MODEL_API_URL")
     
     JOB_API_URL = os.getenv("JOB_API_URL")
     API_TIMEOUT = int(os.getenv("API_TIMEOUT"))  
