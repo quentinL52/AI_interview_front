@@ -410,7 +410,7 @@ def get_feedback_details(feedback_id):
         flash("Une erreur est survenue.", "danger")
         return redirect(url_for('feedbacks'))
 
-@app.route('/save-analysis', methods=['POST'])
+@app.route('/save-analysis-old_way_a supprimer', methods=['POST'])
 @login_required
 def save_analysis():
     data = request.get_json()
