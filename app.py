@@ -456,6 +456,32 @@ def save_analysis():
     feedback_content = data.get('feedback_content') 
     job_offer_id = data.get('job_offer_id')
 
+    # Si c'est juste pour sauvegarder les métadonnées (feedback_content est None)
+    if not feedback_content and job_offer_id:
+        try:
+            jobs = fetch_job_offers()
+            job_title = "Offre inconnue"
+            found_job = next((job for job in jobs if job.get('id') == job_offer_id), None)
+            if found_job:
+                job_title = found_job.get('poste', job_title)
+
+            mongo_manager = MongoManager()
+            feedback_id = mongo_manager.save_interview_feedback({
+                "user_google_id": g.user.google_id,
+                "job_offer_id": job_offer_id,
+                "job_title": job_title,
+                "feedback_data": None,
+                "timestamp": datetime.utcnow().isoformat(),
+                "status": "processing",
+                "type": "interview"
+            })
+            mongo_manager.close_connection()
+            return jsonify({'success': True, 'feedback_id': str(feedback_id)}), 200
+        except Exception as e:
+            logging.error(f"Erreur lors de la sauvegarde des métadonnées: {e}")
+            return jsonify({'error': 'Erreur serveur'}), 500
+
+    # Si c'est pour sauvegarder le feedback complet (ancien comportement)
     if not feedback_content or not job_offer_id:
         return jsonify({'error': 'Données manquantes'}), 400
 
@@ -474,6 +500,41 @@ def save_analysis():
     except Exception as e:
         logging.error(f"Erreur lors de la sauvegarde de l'analyse : {e}")
         return jsonify({'error': 'Erreur serveur'}), 500
+
+@app.route('/feedback', methods=['GET', 'POST'])
+@login_required
+def feedback():
+    if request.method == 'POST':
+        try:
+            rating = request.form.get('rating')
+            feedback_text = request.form.get('feedback')
+            
+            if not rating or not feedback_text:
+                flash("Veuillez remplir tous les champs obligatoires.", "warning")
+                return render_template('feedback.html')
+            
+            mongo_manager = MongoManager()
+            feedback_data = {
+                "user_google_id": g.user.google_id,
+                "user_email": g.user.email,
+                "rating": int(rating),
+                "feedback_text": feedback_text,
+                "timestamp": datetime.utcnow().isoformat(),
+                "type": "general"
+            }
+            
+            mongo_manager.save_general_feedback(feedback_data)
+            mongo_manager.close_connection()
+            
+            flash("Merci pour votre feedback ! Il a été envoyé avec succès.", "success")
+            return redirect(url_for('feedback'))
+            
+        except Exception as e:
+            logging.error(f"Erreur lors de la sauvegarde du feedback : {e}")
+            flash("Une erreur est survenue lors de l'envoi de votre feedback.", "danger")
+            return render_template('feedback.html')
+    
+    return render_template('feedback.html')
 
 @app.errorhandler(404)
 def page_not_found(e):
