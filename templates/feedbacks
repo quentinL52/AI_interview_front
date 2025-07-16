@@ -1,0 +1,265 @@
+{% extends "base.html" %}
+
+{% block title %}Historique des feedbacks - AIrh{% endblock %}
+
+{% block content %}
+<style>
+    .feedbacks-container { padding: 2rem; }
+    .page-header { margin-bottom: 2rem; }
+    .page-title { font-size: 2rem; font-weight: 600; color: var(--text-color); margin-bottom: 0.5rem; }
+    .page-subtitle { color: #6B7280; font-size: 1rem; }
+    .feedback-filters { background: white; border-radius: 0.75rem; padding: 1rem; margin-bottom: 2rem; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
+    .filter-button { padding: 0.5rem 1rem; border: 1px solid var(--border-color); border-radius: 0.375rem; background: white; color: var(--text-color); cursor: pointer; transition: all 0.2s; font-size: 0.875rem; }
+    .filter-button.active { background: var(--primary-color); color: white; border-color: var(--primary-color); }
+    .filter-button:hover { border-color: var(--primary-color); }
+    .feedbacks-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1.5rem; }
+    .feedback-card { background: white; border-radius: 0.75rem; padding: 1.5rem; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); transition: transform 0.2s ease-in-out; height: 100%; display: flex; flex-direction: column; position: relative; }
+    .feedback-card:hover { transform: translateY(-5px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); }
+    .feedback-type-badge { position: absolute; top: 1rem; right: 1rem; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 500; }
+    .feedback-type-badge.interview { background: #E0F2FE; color: #0369A1; }
+    .feedback-type-badge.general { background: #F0FDF4; color: #166534; }
+    .feedback-header { margin-bottom: 1rem; padding-right: 4rem; }
+    .feedback-title { font-size: 1.125rem; font-weight: 600; color: var(--text-color); margin-bottom: 0.5rem; }
+    .feedback-meta { display: flex; flex-direction: column; gap: 0.25rem; color: #6B7280; font-size: 0.875rem; }
+    .feedback-meta-item { display: flex; align-items: center; gap: 0.5rem; }
+    .feedback-meta-item i { color: var(--primary-color); width: 16px; }
+    .feedback-rating { display: flex; align-items: center; gap: 0.5rem; margin: 1rem 0; }
+    .stars { display: flex; gap: 0.25rem; }
+    .star { color: #D1D5DB; font-size: 1rem; }
+    .star.filled { color: #F59E0B; }
+    .feedback-preview { color: #4B5563; font-size: 0.875rem; line-height: 1.5; margin-bottom: 1rem; flex-grow: 1; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; }
+    .feedback-actions { display: flex; gap: 0.5rem; margin-top: auto; }
+    .btn-view { padding: 0.5rem 1rem; background: var(--primary-color); color: white; text-decoration: none; border-radius: 0.375rem; font-size: 0.875rem; font-weight: 500; transition: background-color 0.2s; text-align: center; flex: 1; }
+    .btn-view:hover { background: var(--secondary-color); color: white; }
+    .btn-view.processing { background: #F59E0B; cursor: not-allowed; }
+    .empty-state { text-align: center; padding: 4rem 2rem; background: white; border-radius: 0.75rem; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); }
+    .empty-state i { font-size: 3rem; color: #D1D5DB; margin-bottom: 1rem; }
+    .empty-state h3 { color: var(--text-color); font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem; }
+    .empty-state p { color: #6B7280; margin-bottom: 1.5rem; }
+    .btn-primary { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1.5rem; background: var(--primary-color); color: white; text-decoration: none; border-radius: 0.375rem; font-weight: 500; transition: background-color 0.2s; }
+    .btn-primary:hover { background: var(--secondary-color); color: white; }
+    .processing-indicator { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 2rem; border-radius: 0.75rem; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); z-index: 1000; text-align: center; }
+    .spinner { width: 40px; height: 40px; border: 4px solid #E5E7EB; border-top: 4px solid var(--primary-color); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 1rem; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    @media (max-width: 768px) { .feedbacks-grid { grid-template-columns: 1fr; } .feedback-filters { flex-direction: column; align-items: stretch; } .filter-button { text-align: center; } }
+</style>
+
+<div class="feedbacks-container">
+    <div class="page-header">
+        <h1 class="page-title">Historique des feedbacks</h1>
+        <p class="page-subtitle">Consultez tous vos feedbacks d'entretiens et avis généraux</p>
+    </div>
+
+    {% if feedbacks %}
+    <div class="feedback-filters">
+        <span style="font-weight: 500; color: var(--text-color);">Filtrer par type :</span>
+        <button class="filter-button active" onclick="filterFeedbacks('all')">
+            <i class="fas fa-list"></i> Tous
+        </button>
+        <button class="filter-button" onclick="filterFeedbacks('interview')">
+            <i class="fas fa-microphone"></i> Entretiens
+        </button>
+        <button class="filter-button" onclick="filterFeedbacks('general')">
+            <i class="fas fa-star"></i> Généraux
+        </button>
+    </div>
+
+    <div class="feedbacks-grid">
+        {% for feedback in feedbacks %}
+        <div class="feedback-card" data-type="{{ feedback.type }}" data-status="{{ feedback.get('status', 'completed') }}" data-id="{{ feedback._id }}">
+            <div class="feedback-type-badge {{ feedback.type }}">
+                {% if feedback.type == 'interview' %}
+                    <i class="fas fa-microphone"></i> Entretien
+                {% else %}
+                    <i class="fas fa-star"></i> Général
+                {% endif %}
+            </div>
+            
+            <div class="feedback-header">
+                <h3 class="feedback-title">{{ feedback.job_title }}</h3>
+                <div class="feedback-meta">
+                    <div class="feedback-meta-item">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span>{{ feedback.formatted_timestamp }}</span>
+                    </div>
+                    {% if feedback.type == 'interview' %}
+                        <div class="feedback-meta-item">
+                            <i class="fas fa-chart-line"></i>
+                            <span>
+                                {% if feedback.get('status') == 'processing' %}
+                                    Analyse en cours...
+                                {% else %}
+                                    Analyse d'entretien
+                                {% endif %}
+                            </span>
+                        </div>
+                    {% else %}
+                        <div class="feedback-meta-item">
+                            <i class="fas fa-user"></i>
+                            <span>Feedback utilisateur</span>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            {% if feedback.type == 'general' and feedback.rating %}
+            <div class="feedback-rating">
+                <span style="font-weight: 500; color: var(--text-color);">Note :</span>
+                <div class="stars">
+                    {% for i in range(1, 6) %}
+                        <i class="fas fa-star star {% if i <= feedback.rating %}filled{% endif %}"></i>
+                    {% endfor %}
+                </div>
+                <span style="color: #6B7280; font-size: 0.875rem;">({{ feedback.rating }}/5)</span>
+            </div>
+            {% endif %}
+
+            <div class="feedback-preview">
+                {% if feedback.type == 'interview' %}
+                    {% if feedback.get('status') == 'processing' %}
+                        Votre entretien est en cours d'analyse. Les résultats seront disponibles sous peu.
+                    {% elif feedback.feedback_data and feedback.feedback_data.resume %}
+                        {{ feedback.feedback_data.resume[:150] }}...
+                    {% else %}
+                        Analyse complète de votre entretien avec recommandations personnalisées.
+                    {% endif %}
+                {% else %}
+                    {{ feedback.feedback_text[:150] }}{% if feedback.feedback_text|length > 150 %}...{% endif %}
+                {% endif %}
+            </div>
+
+            <div class="feedback-actions">
+                {% if feedback.type == 'interview' %}
+                    {% if feedback.get('status') == 'processing' %}
+                        <button class="btn-view processing" disabled>
+                            <i class="fas fa-hourglass-half"></i> En cours...
+                        </button>
+                    {% else %}
+                        <a href="{{ url_for('get_feedback_details', feedback_id=feedback._id) }}" class="btn-view">
+                            <i class="fas fa-eye"></i> Voir l'analyse
+                        </a>
+                    {% endif %}
+                {% else %}
+                    <button class="btn-view" onclick="showGeneralFeedback('{{ feedback._id }}')">
+                        <i class="fas fa-eye"></i> Voir le détail
+                    </button>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% else %}
+    <div class="empty-state">
+        <i class="fas fa-comments"></i>
+        <h3>Aucun feedback pour le moment</h3>
+        <p>Commencez par faire un entretien ou donner votre avis sur AIrh pour voir vos feedbacks ici.</p>
+        <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+            <a href="{{ url_for('interview_ai') }}" class="btn-primary">
+                <i class="fas fa-microphone"></i>
+                Commencer un entretien
+            </a>
+            <a href="{{ url_for('feedback') }}" class="btn-primary">
+                <i class="fas fa-star"></i>
+                Donner mon avis
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<div class="processing-indicator" id="processingIndicator">
+    <div class="spinner"></div>
+    <p style="margin: 0; color: var(--text-color); font-weight: 500;">Vérification des analyses en cours...</p>
+</div>
+
+<div class="modal fade" id="generalFeedbackModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Détail du feedback</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="modalBody"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function filterFeedbacks(type) {
+    const cards = document.querySelectorAll('.feedback-card');
+    const buttons = document.querySelectorAll('.filter-button');
+    
+    buttons.forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+    
+    cards.forEach(card => {
+        if (type === 'all' || card.dataset.type === type) {
+            card.style.display = 'flex';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+}
+
+function showGeneralFeedback(feedbackId) {
+    const feedbacks = {{ feedbacks|tojson }};
+    const feedback = feedbacks.find(f => f._id === feedbackId);
+    
+    if (feedback) {
+        const modalBody = document.getElementById('modalBody');
+        modalBody.innerHTML = `
+            <div style="margin-bottom: 1rem;">
+                <strong>Date :</strong> ${feedback.formatted_timestamp}
+            </div>
+            <div style="margin-bottom: 1rem;">
+                <strong>Note :</strong> 
+                <div class="stars" style="display: inline-flex; gap: 0.25rem; margin-left: 0.5rem;">
+                    ${Array.from({length: 5}, (_, i) => 
+                        `<i class="fas fa-star star ${i < feedback.rating ? 'filled' : ''}" style="color: ${i < feedback.rating ? '#F59E0B' : '#D1D5DB'};"></i>`
+                    ).join('')}
+                </div>
+                (${feedback.rating}/5)
+            </div>
+            <div>
+                <strong>Commentaire :</strong>
+                <div style="margin-top: 0.5rem; padding: 1rem; background: #F9FAFB; border-radius: 0.5rem; line-height: 1.6;">
+                    ${feedback.feedback_text.replace(/\n/g, '<br>')}
+                </div>
+            </div>
+        `;
+        
+        const modal = new bootstrap.Modal(document.getElementById('generalFeedbackModal'));
+        modal.show();
+    }
+}
+
+async function checkProcessingFeedbacks() {
+    const processingCards = document.querySelectorAll('.feedback-card[data-status="processing"]');
+    
+    if (processingCards.length === 0) return;
+    
+    try {
+        const response = await fetch('/api/check-interview-feedback');
+        const data = await response.json();
+        
+        if (data.status === 'completed') {
+            location.reload();
+        }
+    } catch (error) {
+        console.error('Erreur lors de la vérification:', error);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const processingCards = document.querySelectorAll('.feedback-card[data-status="processing"]');
+    
+    if (processingCards.length > 0) {
+        setInterval(checkProcessingFeedbacks, 5000);
+    }
+});
+</script>
+{% endblock %}
