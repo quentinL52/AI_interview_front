@@ -153,15 +153,11 @@
         <div class="empty-state">
             <i class="fas fa-comments"></i>
             <h3>Aucun feedback pour le moment</h3>
-            <p>Commencez par faire un entretien ou donner votre avis sur AIrh pour voir vos feedbacks ici.</p>
+            <p>Ici vous retrouverez vos feedbacks d'entretien, commencez par lancer un entretien.</p>
             <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
-                <a href="{{ url_for('interview_ai') }}" class="btn-primary">
-                    <i class="fas fa-microphone"></i>
-                    Commencer un entretien
-                </a>
-                <a href="{{ url_for('feedback') }}" class="btn-primary">
-                    <i class="fas fa-star"></i>
-                    Donner mon avis
+                <a href="{{ url_for('jobs') }}" class="btn-primary">
+                    <i class="fas fa-briefcase"></i>
+                    Voir les offres et commencer un entretien
                 </a>
             </div>
         </div>
