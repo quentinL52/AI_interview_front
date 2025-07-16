@@ -387,7 +387,7 @@
                     <i class="fas fa-file-alt"></i>
                     <span>Resume</span>
                 </a>
-            <a href="{{ url_for('feedback') }}" class="nav-item {% if request;endpoint == 'feedback' %}active{% enfif}">
+            <a href="{{ url_for('feedback') }}" class="nav-item {% if request.endpoint == 'feedback' %}active{% enfif %}">
                 <i class="fas fa-comments"></i>
             </a>
             </div>
