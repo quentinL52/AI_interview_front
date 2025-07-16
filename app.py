@@ -453,50 +453,29 @@ def contact():
 @login_required
 def save_analysis():
     data = request.get_json()
-    feedback_content = data.get('feedback_content') 
     job_offer_id = data.get('job_offer_id')
-    if not feedback_content and job_offer_id:
-        try:
-            jobs = fetch_job_offers()
-            job_title = "Offre inconnue"
-            found_job = next((job for job in jobs if job.get('id') == job_offer_id), None)
-            if found_job:
-                job_title = found_job.get('poste', job_title)
-
-            mongo_manager = MongoManager()
-            feedback_id = mongo_manager.save_interview_feedback({
-                "user_google_id": g.user.google_id,
-                "job_offer_id": job_offer_id,
-                "job_title": job_title,
-                "feedback_data": None,
-                "timestamp": datetime.utcnow().isoformat(),
-                "status": "processing",
-                "type": "interview"
-            })
-            mongo_manager.close_connection()
-            return jsonify({'success': True, 'feedback_id': str(feedback_id)}), 200
-        except Exception as e:
-            logging.error(f"Erreur lors de la sauvegarde des métadonnées: {e}")
-            return jsonify({'error': 'Erreur serveur'}), 500
-
-    # Si c'est pour sauvegarder le feedback complet (ancien comportement)
-    if not feedback_content or not job_offer_id:
-        return jsonify({'error': 'Données manquantes'}), 400
-
+    if not job_offer_id:
+        return jsonify({'error': 'Donnée manquante : job_offer_id'}), 400
     try:
+        jobs = fetch_job_offers()
+        job_title = "Offre inconnue"
+        found_job = next((job for job in jobs if job.get('id') == job_offer_id), None)
+        if found_job:
+            job_title = found_job.get('poste', job_title)
         mongo_manager = MongoManager()
-        feedback_doc = {
+        feedback_id = mongo_manager.save_interview_feedback({
             "user_google_id": g.user.google_id,
-            "job_id": job_offer_id,
-            "feedback_data": feedback_content,
-            "last_updated": datetime.utcnow(),
-            "status": "completed"
-        }
-        mongo_manager.save_feedback(g.user.google_id, job_offer_id, feedback_content)
+            "job_offer_id": job_offer_id,
+            "job_title": job_title,
+            "feedback_data": None,
+            "timestamp": datetime.utcnow().isoformat(),
+            "status": "processing",
+            "type": "interview"
+        })
         mongo_manager.close_connection()
-        return jsonify({'success': True}), 200
+        return jsonify({'success': True, 'feedback_id': str(feedback_id)}), 200
     except Exception as e:
-        logging.error(f"Erreur lors de la sauvegarde de l'analyse : {e}")
+        logging.error(f"Erreur lors de la sauvegarde des métadonnées: {e}")
         return jsonify({'error': 'Erreur serveur'}), 500
 
 @app.errorhandler(404)
