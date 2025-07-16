@@ -177,6 +177,36 @@ class MongoManager:
         except Exception as e:
             logging.error(f"Erreur récupération feedback par status: {str(e)}")
             return None
+
+    def get_all_feedbacks(self, google_id: str):
+    try:
+        interview_collection = self.db['interview_feedbacks']
+        
+        interview_feedbacks = list(interview_collection.find({"user_google_id": google_id}))
+        
+        for feedback in interview_feedbacks:
+            feedback['_id'] = str(feedback['_id'])
+            feedback['type'] = 'interview'
+        
+        return interview_feedbacks
+    except Exception as e:
+        logging.error(f"Erreur récupération feedbacks: {str(e)}")
+        return []
+
+    def get_feedback_by_id(self, feedback_id: str):
+        try:
+            interview_collection = self.db['interview_feedbacks']
+            
+            feedback = interview_collection.find_one({"_id": ObjectId(feedback_id)})
+            if feedback:
+                feedback['_id'] = str(feedback['_id'])
+                feedback['type'] = 'interview'
+                return feedback
+            
+            return None
+        except Exception as e:
+            logging.error(f"Erreur récupération feedback par ID: {str(e)}")
+            return None
     
     def update_interview_feedback(self, feedback_id: str, feedback_data: dict, status: str):
         try:
