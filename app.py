@@ -295,7 +295,7 @@ def interview_ai():
             
             logging.info(f"Sending payload to model API for user {g.user.google_id} and job {job_id}")
             api_response = requests.post(
-                f"{MODEL_API_URL}/api/v1/simulate-interview/", 
+                f"{MODEL_API_URL}/simulate-interview/", 
                 data=encoded_payload,
                 headers=headers,
                 timeout=120 
