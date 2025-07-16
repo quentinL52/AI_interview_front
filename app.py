@@ -333,82 +333,121 @@ def interview_ai():
 @app.route('/feedbacks')
 @login_required
 def feedbacks():
-    MODEL_API_URL = Config.MODEL_API_URL
     try:
-        api_response = requests.get(f"{MODEL_API_URL}/feedbacks/{g.user.google_id}")
-        api_response.raise_for_status()
-        feedbacks_data = api_response.json()
-        jobs = fetch_job_offers() 
         mongo_manager = MongoManager()
-
-        for feedback in feedbacks_data:
-            job_offer_id = feedback.get('job_offer_id')
-            job_title = "Offre inconnue"
-            found_job = next((job for job in jobs if job.get('id') == job_offer_id), None)
-            if found_job:
-                job_title = found_job.get('poste', job_title)
-            else:
-                manual_job = mongo_manager.get_job_offer_by_id(job_offer_id)
-                if manual_job:
-                    job_title = manual_job.get('poste', job_title)
-            
-            feedback['job_title'] = job_title
+        all_feedbacks = mongo_manager.get_all_feedbacks(g.user.google_id)
+        mongo_manager.close_connection()
+        
+        for feedback in all_feedbacks:
             if 'timestamp' in feedback:
-                feedback['formatted_timestamp'] = datetime.fromisoformat(feedback['timestamp']).strftime('%d/%m/%Y %H:%M')
+                if isinstance(feedback['timestamp'], str):
+                    try:
+                        feedback['formatted_timestamp'] = datetime.fromisoformat(feedback['timestamp']).strftime('%d/%m/%Y %H:%M')
+                    except ValueError:
+                        feedback['formatted_timestamp'] = feedback['timestamp']
+                else:
+                    feedback['formatted_timestamp'] = feedback['timestamp'].strftime('%d/%m/%Y %H:%M')
             else:
                 feedback['formatted_timestamp'] = 'Date inconnue'
         
-        mongo_manager.close_connection()
-        return render_template('feedbacks.html', feedbacks=feedbacks_data)
-    except requests.exceptions.RequestException as e:
-        logging.error(f"Erreur de communication avec l'API du modèle lors de la récupération des feedbacks: {e}")
-        flash("Impossible de récupérer vos feedbacks pour le moment.", "danger")
-        return render_template('feedbacks.html', feedbacks=[])
+        all_feedbacks.sort(key=lambda x: x.get('timestamp', ''), reverse=True)
+        return render_template('feedbacks.html', feedbacks=all_feedbacks)
+        
     except Exception as e:
-        logging.error(f"Erreur critique lors de la récupération des feedbacks: {e}", exc_info=True)
-        flash("Une erreur interne est survenue lors de la récupération de vos feedbacks.", "danger")
+        logging.error(f"Erreur lors de la récupération des feedbacks: {e}")
+        flash("Une erreur est survenue lors de la récupération de vos feedbacks.", "danger")
         return render_template('feedbacks.html', feedbacks=[])
+
+@app.route('/api/check-interview-feedback')
+@login_required
+def check_interview_feedback():
+    MODEL_API_URL = Config.MODEL_API_URL
+    try:
+        response = requests.get(f"{MODEL_API_URL}/get-feedback/{g.user.google_id}", timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            if data.get('status') == 'completed' and data.get('feedback_data'):
+                mongo_manager = MongoManager()
+                existing_feedback = mongo_manager.get_interview_feedback_by_status(g.user.google_id, 'processing')
+                
+                if existing_feedback:
+                    mongo_manager.update_interview_feedback(
+                        existing_feedback['_id'], 
+                        data['feedback_data'], 
+                        'completed'
+                    )
+                    mongo_manager.close_connection()
+                    return jsonify({'status': 'completed', 'feedback_id': str(existing_feedback['_id'])})
+                
+                mongo_manager.close_connection()
+        
+        return jsonify({'status': 'processing'})
+    except Exception as e:
+        logging.error(f"Erreur lors de la vérification du feedback: {e}")
+        return jsonify({'status': 'error'})
+
+@app.route('/feedbacks/<feedback_id>')
+@login_required  
+def get_feedback_details(feedback_id):
+    try:
+        mongo_manager = MongoManager()
+        feedback = mongo_manager.get_feedback_by_id(feedback_id)
+        mongo_manager.close_connection()
+        
+        if feedback and feedback.get('user_google_id') == g.user.google_id:
+            if 'timestamp' in feedback:
+                if isinstance(feedback['timestamp'], str):
+                    feedback['formatted_timestamp'] = datetime.fromisoformat(feedback['timestamp']).strftime('%d/%m/%Y %H:%M')
+                else:
+                    feedback['formatted_timestamp'] = feedback['timestamp'].strftime('%d/%m/%Y %H:%M')
+            return render_template('feedback_details.html', feedback=feedback)
+        
+        flash("Feedback introuvable.", "danger")
+        return redirect(url_for('feedbacks'))
+        
+    except Exception as e:
+        logging.error(f"Erreur lors de la récupération du feedback: {e}")
+        flash("Une erreur est survenue.", "danger")
+        return redirect(url_for('feedbacks'))
+
+@app.route('/save-analysis', methods=['POST'])
+@login_required
+def save_analysis():
+    data = request.get_json()
+    feedback_content = data.get('feedback_content') 
+    job_offer_id = data.get('job_offer_id')
+
+    if not feedback_content or not job_offer_id:
+        return jsonify({'error': 'Données manquantes'}), 400
+
+    try:
+        jobs = fetch_job_offers()
+        job_title = "Offre inconnue"
+        found_job = next((job for job in jobs if job.get('id') == job_offer_id), None)
+        if found_job:
+            job_title = found_job.get('poste', job_title)
+
+        mongo_manager = MongoManager()
+        feedback_id = mongo_manager.save_interview_feedback({
+            "user_google_id": g.user.google_id,
+            "job_offer_id": job_offer_id,
+            "job_title": job_title,
+            "feedback_data": feedback_content,
+            "timestamp": datetime.utcnow().isoformat(),
+            "status": "processing",
+            "type": "interview"
+        })
+        mongo_manager.close_connection()
+        
+        return jsonify({'success': True, 'feedback_id': str(feedback_id)}), 200
+    except Exception as e:
+        logging.error(f"Erreur lors de la sauvegarde de l'analyse: {e}")
+        return jsonify({'error': 'Erreur serveur'}), 500
 
 @app.route('/settings')
 @login_required
 def settings():
     return render_template('settings.html')
-
-@app.route('/feedbacks/<feedback_id>')
-@login_required
-def get_feedback_details(feedback_id):
-    MODEL_API_URL = Config.MODEL_API_URL
-    try:
-        api_response = requests.get(f"{MODEL_API_URL}/feedbacks/{g.user.google_id}/{feedback_id}")
-        api_response.raise_for_status()
-        feedback_data = api_response.json()
-        job_title = "Offre inconnue"
-        jobs = fetch_job_offers()
-        mongo_manager = MongoManager()
-        job_offer_id = feedback_data.get('job_offer_id')
-        found_job = next((job for job in jobs if job.get('id') == job_offer_id), None)
-        if found_job:
-            job_title = found_job.get('poste', job_title)
-        else:
-            manual_job = mongo_manager.get_job_offer_by_id(job_offer_id)
-            if manual_job:
-                job_title = manual_job.get('poste', job_title)
-        mongo_manager.close_connection()
-        feedback_data['job_title'] = job_title
-        if 'timestamp' in feedback_data:
-            feedback_data['formatted_timestamp'] = datetime.fromisoformat(feedback_data['timestamp']).strftime('%d/%m/%Y %H:%M')
-        else:
-            feedback_data['formatted_timestamp'] = 'Date inconnue'
-
-        return render_template('feedback_details.html', feedback=feedback_data)
-    except requests.exceptions.RequestException as e:
-        logging.error(f"Erreur de communication avec l'API du modèle lors de la récupération des détails du feedback: {e}")
-        flash("Impossible de récupérer les détails de ce feedback pour le moment.", "danger")
-        return redirect(url_for('feedbacks'))
-    except Exception as e:
-        logging.error(f"Erreur critique lors de la récupération des détails du feedback: {e}", exc_info=True)
-        flash("Une erreur interne est survenue lors de la récupération des détails du feedback.", "danger")
-        return redirect(url_for('feedbacks'))
 
 @app.route('/contact', methods=['GET', 'POST'])
 def contact():
