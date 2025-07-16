@@ -1,26 +1,48 @@
 {% extends "base.html" %}
 
-{% block title %}Assistant entretient - AIrh{% endblock %}
+{% block title %}Assistant Entretien - AIrh{% endblock %}
 
 {% block content %}
 <style>
     .chat-container {
         max-width: 800px;
-        margin: 0 auto;
+        margin: 2rem auto;
         padding: 2rem;
-        height: calc(100vh - 100px);
+        height: calc(100vh - 150px);
         display: flex;
         flex-direction: column;
+        background-color: #f9fafb;
+        border-radius: 1rem;
+        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    }
+
+    .chat-header {
+        text-align: center;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .chat-header h1 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #111827;
+    }
+
+    .chat-header p {
+        font-size: 0.875rem;
+        color: #6b7280;
     }
 
     .chat-messages {
         background: white;
         border-radius: 0.75rem;
         padding: 1.5rem;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
         flex: 1;
         overflow-y: auto;
         margin-bottom: 1rem;
+        scroll-behavior: smooth;
     }
 
     .message {
@@ -30,21 +52,26 @@
     }
 
     .message-content {
-        padding: 1rem;
+        padding: 0.75rem 1.25rem;
         border-radius: 0.75rem;
-        max-width: 80%;
+        max-width: 85%;
+        line-height: 1.5;
     }
 
     .message.bot .message-content {
         background: #F3F4F6;
-        color: var(--text-color);
+        color: #374151;
         align-self: flex-start;
     }
 
     .message.user .message-content {
-        background: var(--primary-color);
+        background: #4f46e5;
         color: white;
         align-self: flex-end;
+    }
+    
+    .message.bot .message-content strong {
+        color: #4f46e5;
     }
 
     .chat-input {
@@ -53,109 +80,93 @@
         background: white;
         padding: 1rem;
         border-radius: 0.75rem;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        border: 1px solid #e5e7eb;
     }
 
     .chat-input input {
         flex: 1;
         padding: 0.75rem 1rem;
-        border: 1px solid var(--border-color);
-        border-radius: 0.375rem;
+        border: 1px solid #d1d5db;
+        border-radius: 0.5rem;
         font-size: 1rem;
+        transition: border-color 0.2s, box-shadow 0.2s;
     }
 
     .chat-input input:focus {
         outline: none;
-        border-color: var(--primary-color);
-        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        border-color: #4f46e5;
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
     }
 
     .chat-input button {
         padding: 0.75rem 1.5rem;
-        background: var(--primary-color);
+        background: #4f46e5;
         color: white;
         border: none;
-        border-radius: 0.375rem;
-        font-weight: 500;
+        border-radius: 0.5rem;
+        font-weight: 600;
         cursor: pointer;
-        transition: all 0.2s;
+        transition: background-color 0.2s;
     }
 
     .chat-input button:hover {
-        background: var(--secondary-color);
+        background: #4338ca;
     }
 
     .chat-input button:disabled {
-        background: #E5E7EB;
+        background: #9ca3af;
         cursor: not-allowed;
     }
 
     .typing-indicator {
-        display: none;
+        display: none; /* Caché par défaut */
         padding: 1rem;
-        background: #F3F4F6;
-        border-radius: 0.75rem;
         margin-bottom: 1rem;
         align-self: flex-start;
-        max-width: 80%;
         display: flex;
         align-items: center;
         gap: 0.5rem;
     }
 
     .typing-indicator.show {
-        display: flex;
+        display: flex; /* Affiché via JS */
     }
 
-    .typing-dots {
-        display: flex;
-        gap: 0.25rem;
-    }
-
+    .typing-dots { display: flex; gap: 0.25rem; }
     .typing-dot {
-        width: 8px;
-        height: 8px;
-        background: #9CA3AF;
-        border-radius: 50%;
+        width: 8px; height: 8px; background: #9CA3AF; border-radius: 50%;
         animation: typing-bounce 1.4s infinite ease-in-out;
     }
-
     .typing-dot:nth-child(1) { animation-delay: -0.32s; }
     .typing-dot:nth-child(2) { animation-delay: -0.16s; }
     .typing-dot:nth-child(3) { animation-delay: 0; }
-
     @keyframes typing-bounce {
-        0%, 80%, 100% { 
-            transform: scale(0.8);
-            opacity: 0.5;
-        }
-        40% { 
-            transform: scale(1);
-            opacity: 1;
-        }
+        0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
+        40% { transform: scale(1); opacity: 1; }
     }
-
-    .typing-text {
-        color: #6B7280;
-        font-size: 0.875rem;
-        font-style: italic;
-    }
+    .typing-text { color: #6B7280; font-size: 0.875rem; font-style: italic; }
 </style>
 
 <div class="chat-container">
-    <div class="chat-messages" id="chatMessages">
-        <div class="message bot">
-            
-        </div>
+    <div class="chat-header">
+        <h1>Assistant d'Entretien AIrh</h1>
+        <p>Simulation pour le poste de : <strong>{{ job_offer.poste }}</strong></p>
     </div>
+
+    <div class="chat-messages" id="chatMessages">
+        <!-- Les messages du chat seront injectés ici par JavaScript -->
+    </div>
+
     <div class="typing-indicator" id="typingIndicator">
         <div class="typing-dots">
             <div class="typing-dot"></div>
             <div class="typing-dot"></div>
             <div class="typing-dot"></div>
         </div>
-        <span class="typing-text">AIrh is typing...</span>
+        <span class="typing-text">AIrh est en train d'écrire...</span>
     </div>
+
     <div class="chat-input">
         <input type="text" id="userInput" placeholder="Tapez votre message..." autocomplete="off">
         <button id="sendButton">Envoyer</button>
@@ -175,10 +186,15 @@
 
     function addMessageToUI(content, role) {
         const messageDiv = document.createElement('div');
-        const messageClass = (role === 'user') ? 'user' : 'bot';
-        messageDiv.className = `message ${messageClass}`;
-        const formattedContent = content.replace(/\n/g, '<br>');
-        messageDiv.innerHTML = `<div class="message-content">${formattedContent}</div>`;
+        messageDiv.className = `message ${role}`;
+        
+        // Utiliser textContent pour la sécurité, puis innerHTML pour le formatage
+        const contentDiv = document.createElement('div');
+        contentDiv.className = 'message-content';
+        contentDiv.textContent = content; // D'abord le texte brut
+        contentDiv.innerHTML = contentDiv.innerHTML.replace(/\n/g, '<br>'); // Puis le formatage
+
+        messageDiv.appendChild(contentDiv);
         chatMessages.appendChild(messageDiv);
         chatMessages.scrollTop = chatMessages.scrollHeight;
     }
@@ -191,24 +207,6 @@
 
     function hideTypingIndicator() {
         typingIndicator.classList.remove('show');
-        if (typingIndicator.parentNode) {
-            typingIndicator.parentNode.removeChild(typingIndicator);
-        }
-    }
-
-    async function saveAnalysisMetadata() {
-        try {
-            await fetch('/save-analysis', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    feedback_content: null,
-                    job_offer_id: jobId
-                })
-            });
-        } catch (error) {
-            console.error('Erreur sauvegarde métadonnées:', error);
-        }
     }
 
     async function postConversation() {
@@ -217,14 +215,13 @@
         showTypingIndicator();
 
         if (!jobId) {
-            console.error("Erreur: job_id non trouvé dans l'URL.");
-            addMessageToUI("Erreur critique : impossible de trouver l'identifiant de l'offre d'emploi.");
+            addMessageToUI("Erreur critique : L'identifiant de l'offre est manquant. Veuillez revenir à la page des offres.", 'bot');
             hideTypingIndicator();
             return;
         }
 
         try {
-            const response = await fetch('/interview-ai', {
+            const response = await fetch("{{ url_for('interview_ai') }}", {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -233,29 +230,41 @@
                 })
             });
 
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || `Erreur HTTP: ${response.status}`);
-            }
-            
             const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.response || `Erreur HTTP: ${response.status}`);
+            }
             
             if (data.response) {
                 conversationHistory.push({ role: 'assistant', content: data.response });
-                addMessageToUI(data.response, 'assistant');
+                addMessageToUI(data.response, 'bot');
                 
-                if (data.response.toLowerCase().includes('nous allons maintenant passer a l\'analyse')) {
-                    await saveAnalysisMetadata();
+                // On réagit au statut renvoyé par le serveur (géré par le graphe)
+                if (data.status === 'finished') {
+                    // L'entretien est terminé, on bloque l'interface
+                    addMessageToUI("L'entretien est maintenant terminé. L'analyse de notre échange va commencer. Vous serez redirigé vers la page de vos feedbacks.", 'bot');
+                    userInput.disabled = true;
+                    sendButton.disabled = true;
+                    userInput.placeholder = "Entretien terminé.";
+
+                    // Rediriger l'utilisateur après un court délai
+                    setTimeout(() => {
+                        window.location.href = "{{ url_for('feedbacks') }}";
+                    }, 5000);
+
+                } else {
+                    // L'entretien continue, on réactive l'interface
+                    sendButton.disabled = false;
+                    userInput.disabled = false;
+                    userInput.focus();
                 }
             }
         } catch (error) {
-            console.error('Erreur:', error);
-            addMessageToUI('Désolé, une erreur technique est survenue.');
+            console.error('Erreur lors de la conversation:', error);
+            addMessageToUI('Désolé, une erreur technique est survenue. Veuillez rafraîchir la page.', 'bot');
         } finally {
             hideTypingIndicator();
-            sendButton.disabled = false;
-            userInput.disabled = false;
-            userInput.focus();
         }
     }
     
@@ -270,11 +279,13 @@
         await postConversation();
     }
     
+    // Événement au chargement de la page pour démarrer la conversation
     document.addEventListener('DOMContentLoaded', () => {
-        postConversation();
+        postConversation(); // Premier appel pour obtenir le message de bienvenue de l'IA
         userInput.focus();
     });
 
+    // Écouteurs d'événements pour l'envoi de message
     sendButton.addEventListener('click', handleUserMessage);
     userInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
