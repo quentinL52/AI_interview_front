@@ -346,22 +346,44 @@ def interview_ai():
 def feedbacks():
     try:
         mongo_manager = MongoManager()
+        
+        # Récupérer tous les feedbacks pour l'utilisateur
         all_feedbacks = mongo_manager.get_all_feedbacks(g.user.google_id)
-        mongo_manager.close_connection()
+        
+        # Enrichir les feedbacks avec les informations des offres d'emploi
+        jobs_data = fetch_job_offers()  # Récupérer toutes les offres
         
         for feedback in all_feedbacks:
-            if 'timestamp' in feedback:
-                if isinstance(feedback['timestamp'], str):
+            # Formater la date
+            if 'updated_at' in feedback:
+                if isinstance(feedback['updated_at'], str):
                     try:
-                        feedback['formatted_timestamp'] = datetime.fromisoformat(feedback['timestamp']).strftime('%d/%m/%Y %H:%M')
+                        feedback['formatted_timestamp'] = datetime.fromisoformat(feedback['updated_at'].replace('Z', '+00:00')).strftime('%d/%m/%Y %H:%M')
                     except ValueError:
-                        feedback['formatted_timestamp'] = feedback['timestamp']
+                        feedback['formatted_timestamp'] = feedback['updated_at']
                 else:
-                    feedback['formatted_timestamp'] = feedback['timestamp'].strftime('%d/%m/%Y %H:%M')
+                    feedback['formatted_timestamp'] = feedback['updated_at'].strftime('%d/%m/%Y %H:%M')
             else:
                 feedback['formatted_timestamp'] = 'Date inconnue'
+            
+            # Trouver le titre du poste correspondant
+            job_offer_id = feedback.get('job_offer_id')
+            if job_offer_id and jobs_data:
+                matching_job = next((job for job in jobs_data if job.get('id') == job_offer_id), None)
+                if matching_job:
+                    feedback['job_title'] = matching_job.get('poste', 'Poste inconnu')
+                    feedback['company_name'] = matching_job.get('entreprise', 'Entreprise inconnue')
+                else:
+                    feedback['job_title'] = f"Poste #{job_offer_id[:8]}..."
+                    feedback['company_name'] = 'Entreprise inconnue'
+            else:
+                feedback['job_title'] = 'Poste inconnu'
+                feedback['company_name'] = 'Entreprise inconnue'
         
-        all_feedbacks.sort(key=lambda x: x.get('timestamp', ''), reverse=True)
+        # Trier par date décroissante
+        all_feedbacks.sort(key=lambda x: x.get('updated_at', ''), reverse=True)
+        
+        mongo_manager.close_connection()
         return render_template('feedbacks.html', feedbacks=all_feedbacks)
         
     except Exception as e:
@@ -369,52 +391,43 @@ def feedbacks():
         flash("Une erreur est survenue lors de la récupération de vos feedbacks.", "danger")
         return render_template('feedbacks.html', feedbacks=[])
 
-@app.route('/api/check-interview-feedback')
-@login_required
-def check_interview_feedback():
-    MODEL_API_URL = Config.MODEL_API_URL
-    try:
-        response = requests.get(f"{MODEL_API_URL}/get-feedback/{g.user.google_id}", timeout=10)
-        if response.status_code == 200:
-            data = response.json()
-            if data.get('status') == 'completed' and data.get('feedback_data'):
-                mongo_manager = MongoManager()
-                existing_feedback = mongo_manager.get_interview_feedback_by_status(g.user.google_id, 'processing')
-                
-                if existing_feedback:
-                    mongo_manager.update_interview_feedback(
-                        existing_feedback['_id'], 
-                        data['feedback_data'], 
-                        'completed'
-                    )
-                    mongo_manager.close_connection()
-                    return jsonify({'status': 'completed', 'feedback_id': str(existing_feedback['_id'])})
-                
-                mongo_manager.close_connection()
-        
-        return jsonify({'status': 'processing'})
-    except Exception as e:
-        logging.error(f"Erreur lors de la vérification du feedback: {e}")
-        return jsonify({'status': 'error'})
-
 @app.route('/feedbacks/<feedback_id>')
 @login_required  
 def get_feedback_details(feedback_id):
     try:
         mongo_manager = MongoManager()
         feedback = mongo_manager.get_feedback_by_id(feedback_id)
+        
+        if not feedback or feedback.get('user_id') != g.user.google_id:
+            flash("Feedback introuvable.", "danger")
+            return redirect(url_for('feedbacks'))
+        
+        # Formater la date
+        if 'updated_at' in feedback:
+            if isinstance(feedback['updated_at'], str):
+                feedback['formatted_timestamp'] = datetime.fromisoformat(feedback['updated_at'].replace('Z', '+00:00')).strftime('%d/%m/%Y à %H:%M')
+            else:
+                feedback['formatted_timestamp'] = feedback['updated_at'].strftime('%d/%m/%Y à %H:%M')
+        else:
+            feedback['formatted_timestamp'] = 'Date inconnue'
+        
+        # Récupérer les informations de l'offre d'emploi
+        job_offer_id = feedback.get('job_offer_id')
+        if job_offer_id:
+            jobs_data = fetch_job_offers()
+            matching_job = next((job for job in jobs_data if job.get('id') == job_offer_id), None)
+            if matching_job:
+                feedback['job_title'] = matching_job.get('poste', 'Poste inconnu')
+                feedback['company_name'] = matching_job.get('entreprise', 'Entreprise inconnue')
+            else:
+                feedback['job_title'] = f"Poste #{job_offer_id[:8]}..."
+                feedback['company_name'] = 'Entreprise inconnue'
+        else:
+            feedback['job_title'] = 'Poste inconnu'
+            feedback['company_name'] = 'Entreprise inconnue'
+        
         mongo_manager.close_connection()
-        
-        if feedback and feedback.get('user_google_id') == g.user.google_id:
-            if 'timestamp' in feedback:
-                if isinstance(feedback['timestamp'], str):
-                    feedback['formatted_timestamp'] = datetime.fromisoformat(feedback['timestamp']).strftime('%d/%m/%Y %H:%M')
-                else:
-                    feedback['formatted_timestamp'] = feedback['timestamp'].strftime('%d/%m/%Y %H:%M')
-            return render_template('feedback_details.html', feedback=feedback)
-        
-        flash("Feedback introuvable.", "danger")
-        return redirect(url_for('feedbacks'))
+        return render_template('feedback_details.html', feedback=feedback)
         
     except Exception as e:
         logging.error(f"Erreur lors de la récupération du feedback: {e}")
