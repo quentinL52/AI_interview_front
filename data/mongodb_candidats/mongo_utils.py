@@ -107,7 +107,7 @@ class MongoManager:
             # Collection des feedbacks d'entretien
             interview_collection = self.db['interview_feedbacks']
             
-            # Récupérer tous les feedbacks pour l'utilisateur
+            # CORRECTION: Utiliser "user_id" au lieu de "user_google_id"
             feedbacks = list(interview_collection.find({"user_id": user_google_id}))
             
             # Convertir les ObjectId en string
