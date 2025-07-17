@@ -119,24 +119,22 @@ class MongoManager:
             logging.error(f"Erreur sauvegarde feedback entretien: {str(e)}")
             raise e
     
-    def get_all_feedbacks(self, google_id: str):
+    def get_all_feedbacks(self, user_google_id: str):
+        """Récupère tous les feedbacks pour un utilisateur donné"""
         try:
-            general_collection = self.db['general_feedbacks']
+            # Collection des feedbacks d'entretien
             interview_collection = self.db['interview_feedbacks']
             
-            general_feedbacks = list(general_collection.find({"user_google_id": google_id}))
-            interview_feedbacks = list(interview_collection.find({"user_google_id": google_id}))
+            # Récupérer tous les feedbacks pour l'utilisateur
+            feedbacks = list(interview_collection.find({"user_id": user_google_id}))
             
-            for feedback in general_feedbacks:
-                feedback['_id'] = str(feedback['_id'])
-                feedback['type'] = 'general'
-                feedback['job_title'] = 'Feedback général'
-            
-            for feedback in interview_feedbacks:
+            # Convertir les ObjectId en string
+            for feedback in feedbacks:
                 feedback['_id'] = str(feedback['_id'])
                 feedback['type'] = 'interview'
             
-            return general_feedbacks + interview_feedbacks
+            return feedbacks
+            
         except Exception as e:
             logging.error(f"Erreur récupération feedbacks: {str(e)}")
             return []
@@ -163,6 +161,22 @@ class MongoManager:
         except Exception as e:
             logging.error(f"Erreur récupération feedback par ID: {str(e)}")
             return None
+
+    def get_feedback_by_id(self, feedback_id: str):
+        try:
+            interview_collection = self.db['interview_feedbacks']
+            
+            feedback = interview_collection.find_one({"_id": ObjectId(feedback_id)})
+            if feedback:
+                feedback['_id'] = str(feedback['_id'])
+                feedback['type'] = 'interview'
+                return feedback
+            
+            return None
+            
+        except Exception as e:
+            logging.error(f"Erreur récupération feedback par ID: {str(e)}")
+            return None
     
     def get_interview_feedback_by_status(self, google_id: str, status: str):
         try:
@@ -177,53 +191,6 @@ class MongoManager:
         except Exception as e:
             logging.error(f"Erreur récupération feedback par status: {str(e)}")
             return None
-
-    def get_all_feedbacks(self, google_id: str):
-        try:
-            interview_collection = self.db['interview_feedbacks']
-            
-            interview_feedbacks = list(interview_collection.find({"user_google_id": google_id}))
-            
-            for feedback in interview_feedbacks:
-                feedback['_id'] = str(feedback['_id'])
-                feedback['type'] = 'interview'
-            
-            return interview_feedbacks
-        except Exception as e:
-            logging.error(f"Erreur récupération feedbacks: {str(e)}")
-            return []
-
-    def get_feedback_by_id(self, feedback_id: str):
-        try:
-            interview_collection = self.db['interview_feedbacks']
-            
-            feedback = interview_collection.find_one({"_id": ObjectId(feedback_id)})
-            if feedback:
-                feedback['_id'] = str(feedback['_id'])
-                feedback['type'] = 'interview'
-                return feedback
-            
-            return None
-        except Exception as e:
-            logging.error(f"Erreur récupération feedback par ID: {str(e)}")
-            return None
-    
-    def update_interview_feedback(self, feedback_id: str, feedback_data: dict, status: str):
-        try:
-            interview_collection = self.db['interview_feedbacks']
-            interview_collection.update_one(
-                {"_id": ObjectId(feedback_id)},
-                {
-                    "$set": {
-                        "feedback_data": feedback_data,
-                        "status": status,
-                        "updated_at": datetime.utcnow()
-                    }
-                }
-            )
-        except Exception as e:
-            logging.error(f"Erreur mise à jour feedback: {str(e)}")
-            raise e
 
     def close_connection(self):
         self.client.close()
