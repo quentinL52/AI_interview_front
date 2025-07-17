@@ -69,26 +69,6 @@
         width: 16px;
     }
 
-    .score-overview {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        border-radius: 0.75rem;
-        padding: 2rem;
-        margin-bottom: 2rem;
-        text-align: center;
-    }
-
-    .score-value {
-        font-size: 4rem;
-        font-weight: 700;
-        margin-bottom: 0.5rem;
-    }
-
-    .score-label {
-        font-size: 1.25rem;
-        opacity: 0.9;
-    }
-
     .feedback-content {
         background: white;
         border-radius: 0.75rem;
@@ -164,29 +144,6 @@
         margin-bottom: 1rem;
     }
 
-    .summary-box {
-        background: #F0F9FF;
-        border: 1px solid #BAE6FD;
-        border-radius: 0.5rem;
-        padding: 1.5rem;
-        margin-bottom: 2rem;
-    }
-
-    .summary-title {
-        font-size: 1.1rem;
-        font-weight: 600;
-        color: #0369A1;
-        margin-bottom: 0.75rem;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    .summary-text {
-        color: #0F172A;
-        line-height: 1.6;
-    }
-
     .action-buttons {
         display: flex;
         gap: 1rem;
@@ -241,6 +198,18 @@
         color: white;
     }
 
+    .no-content {
+        text-align: center;
+        padding: 3rem;
+        color: #6B7280;
+    }
+
+    .no-content i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        color: #D1D5DB;
+    }
+
     @media (max-width: 768px) {
         .feedback-detail-container {
             padding: 1rem;
@@ -251,12 +220,19 @@
             gap: 0.75rem;
         }
 
-        .score-value {
-            font-size: 3rem;
-        }
-
         .action-buttons {
             flex-direction: column;
+        }
+    }
+
+    @media print {
+        .breadcrumb-nav,
+        .action-buttons {
+            display: none;
+        }
+        
+        .feedback-detail-container {
+            padding: 0;
         }
     }
 </style>
@@ -291,25 +267,6 @@
         </div>
     </div>
 
-    <!-- Score d'adéquation (si disponible) -->
-    {% if feedback.feedback_data and feedback.feedback_data.get('score_adequation') %}
-    <div class="score-overview">
-        <div class="score-value">{{ feedback.feedback_data.score_adequation }}/100</div>
-        <div class="score-label">Score d'adéquation au poste</div>
-    </div>
-    {% endif %}
-
-    <!-- Résumé rapide (si disponible) -->
-    {% if feedback.feedback_data and feedback.feedback_data.get('resume') %}
-    <div class="summary-box">
-        <div class="summary-title">
-            <i class="fas fa-lightbulb"></i>
-            Résumé de l'analyse
-        </div>
-        <div class="summary-text">{{ feedback.feedback_data.resume }}</div>
-    </div>
-    {% endif %}
-
     <!-- Contenu principal de l'analyse -->
     <div class="feedback-content">
         <h2 class="section-title">
@@ -322,8 +279,14 @@
         <div class="content-text" id="analysisContent">
             {% if feedback.get('analysis_report') %}
                 {{ feedback.analysis_report }}
+            {% elif feedback.get('feedback_data') and feedback.feedback_data.get('analysis_report') %}
+                {{ feedback.feedback_data.analysis_report }}
             {% else %}
-                <p>Aucune analyse détaillée disponible pour ce feedback.</p>
+                <div class="no-content">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <h3>Aucune analyse disponible</h3>
+                    <p>L'analyse de cet entretien n'est pas disponible ou en cours de traitement.</p>
+                </div>
             {% endif %}
         </div>
     </div>
