@@ -5,10 +5,10 @@
 {% block content %}
 <style>
     .chat-container {
-        max-width: 800px;
-        margin: 2rem auto;
-        padding: 2rem;
-        height: calc(100vh - 150px);
+        max-width: 1000px;
+        margin: 1rem auto;
+        padding: 1.5rem;
+        height: calc(100vh - 120px);
         display: flex;
         flex-direction: column;
         background-color: #f9fafb;
@@ -18,20 +18,22 @@
 
     .chat-header {
         text-align: center;
-        margin-bottom: 1.5rem;
-        padding-bottom: 1rem;
+        margin-bottom: 1rem;
+        padding-bottom: 0.75rem;
         border-bottom: 1px solid #e5e7eb;
     }
 
     .chat-header h1 {
-        font-size: 1.5rem;
+        font-size: 1.25rem;
         font-weight: 600;
         color: #111827;
+        margin-bottom: 0.25rem;
     }
 
     .chat-header p {
         font-size: 0.875rem;
         color: #6b7280;
+        margin: 0;
     }
 
     .chat-messages {
@@ -150,8 +152,8 @@
 
 <div class="chat-container">
     <div class="chat-header">
-        <h1>Assistant d'Entretien AIrh</h1>
-        <p>Simulation pour le poste de : <strong>{{ job_offer.poste }}</strong></p>
+        <h1>Roni votre assistant d'entretien AIrh</h1>
+        <p>Entretien pour le poste de : <strong>{{ job_offer.poste }}</strong></p>
     </div>
 
     <div class="chat-messages" id="chatMessages">
