@@ -12,6 +12,7 @@ class MongoManager:
         self.db = self.client[Config.MONGO_DB_NAME]
         self.candidate_collection = self.db[Config.MONGO_CV_COLLECTION]  
         self.historique_entretient = self.db[Config.MONGO_INTERVIEW_COLLECTION]
+        self.feedback_collection = self.db[Config.MONGO_FEEDBACK]
         
     # -- CRUD pour le profils des candidats --
     def save_profile(self, profile_data):
@@ -104,11 +105,8 @@ class MongoManager:
     def get_all_feedbacks(self, user_google_id: str):
         """Récupère tous les feedbacks pour un utilisateur donné"""
         try:
-            # Collection des feedbacks d'entretien
-            interview_collection = self.db['interview_feedbacks']
-            
-            # CORRECTION: Utiliser "user_id" au lieu de "user_google_id"
-            feedbacks = list(interview_collection.find({"user_id": user_google_id}))
+            # Utiliser la bonne collection de feedback
+            feedbacks = list(self.feedback_collection.find({"user_id": user_google_id}))
             
             # Convertir les ObjectId en string
             for feedback in feedbacks:
@@ -120,13 +118,12 @@ class MongoManager:
         except Exception as e:
             logging.error(f"Erreur récupération feedbacks: {str(e)}")
             return []
-    
+
     def get_feedback_by_id(self, feedback_id: str):
         """Récupère un feedback spécifique par son ID"""
         try:
-            interview_collection = self.db['interview_feedbacks']
-            
-            feedback = interview_collection.find_one({"_id": ObjectId(feedback_id)})
+            # Utiliser la bonne collection de feedback
+            feedback = self.feedback_collection.find_one({"_id": ObjectId(feedback_id)})
             if feedback:
                 feedback['_id'] = str(feedback['_id'])
                 feedback['type'] = 'interview'
