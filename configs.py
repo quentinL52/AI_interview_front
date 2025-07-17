@@ -8,6 +8,7 @@ class Config:
     MONGO_DB_NAME = os.getenv("MONGO_DB_NAME")
     MONGO_CV_COLLECTION = os.getenv("MONGO_CV_COLLECTION")
     MONGO_INTERVIEW_COLLECTION = os.getenv("MONGO_INTERVIEW_COLLECTION")
+    MONGO_FEEDBACK = os.getenv("MONGO_FEEDBACK")
     MODEL_API_URL=os.getenv("MODEL_API_URL")
     MODEL_API_URL = os.environ.get("MODEL_API_URL")
     
