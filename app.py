@@ -385,9 +385,12 @@ def get_feedback_details(feedback_id):
         mongo_manager = MongoManager()
         feedback = mongo_manager.get_feedback_by_id(feedback_id)
         
+        # CORRECTION: Utiliser "user_id" au lieu de "user_google_id" 
         if not feedback or feedback.get('user_id') != g.user.google_id:
             flash("Feedback introuvable.", "danger")
             return redirect(url_for('feedbacks'))
+        
+        # Le reste du code reste identique...
         if 'updated_at' in feedback:
             if isinstance(feedback['updated_at'], str):
                 feedback['formatted_timestamp'] = datetime.fromisoformat(feedback['updated_at'].replace('Z', '+00:00')).strftime('%d/%m/%Y à %H:%M')
@@ -395,6 +398,7 @@ def get_feedback_details(feedback_id):
                 feedback['formatted_timestamp'] = feedback['updated_at'].strftime('%d/%m/%Y à %H:%M')
         else:
             feedback['formatted_timestamp'] = 'Date inconnue'
+        
         job_offer_id = feedback.get('job_offer_id')
         if job_offer_id:
             jobs_data = fetch_job_offers()
@@ -405,8 +409,10 @@ def get_feedback_details(feedback_id):
                 feedback['job_title'] = f"Poste #{job_offer_id[:8]}..."
         else:
             feedback['job_title'] = 'Poste inconnu'
+        
         mongo_manager.close_connection()
         return render_template('feedback_details.html', feedback=feedback)
+        
     except Exception as e:
         logging.error(f"Erreur lors de la récupération du feedback: {e}")
         flash("Une erreur est survenue.", "danger")
