@@ -189,11 +189,30 @@
         border-radius: 0.5rem;
         transition: all 0.2s;
         border: 1px solid #e2e8f0;
+        cursor: pointer;
+        position: relative;
     }
 
     .stat-card:hover {
         background: #f1f5f9;
         transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+    }
+
+    .stat-card.active {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-color: #667eea;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+
+    .stat-card.active .stat-number {
+        color: white;
+    }
+
+    .stat-card.active .stat-label {
+        color: rgba(255, 255, 255, 0.9);
     }
 
     .stat-icon {
@@ -235,6 +254,11 @@
     .stat-card:nth-child(6) .stat-icon {
         background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
         color: white;
+    }
+
+    .stat-card.active .stat-icon {
+        background: rgba(255, 255, 255, 0.2) !important;
+        color: white !important;
     }
 
     .stat-content {
@@ -328,6 +352,45 @@
 
     .job-card.hidden {
         display: none !important;
+    }
+
+    /* Filter info banner */
+    .filter-info-banner {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1rem 1.5rem;
+        margin: 1rem 1.5rem 0 1.5rem;
+        border-radius: 0.75rem;
+        display: none;
+        align-items: center;
+        justify-content: space-between;
+        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+    }
+
+    .filter-info-banner.show {
+        display: flex;
+    }
+
+    .filter-info-text {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-weight: 500;
+    }
+
+    .clear-filter-btn {
+        background: rgba(255, 255, 255, 0.2);
+        border: none;
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 0.375rem;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+
+    .clear-filter-btn:hover {
+        background: rgba(255, 255, 255, 0.3);
     }
 
     /* Pagination Styles */
@@ -464,6 +527,12 @@
         .search-container {
             margin-top: 1rem;
         }
+
+        .filter-info-banner {
+            flex-direction: column;
+            gap: 1rem;
+            text-align: center;
+        }
     }
 </style>
 
@@ -477,7 +546,7 @@
     <!-- Statistiques des offres -->
     <div class="stats-container" id="statsContainer">
         <div class="stats-grid">
-            <div class="stat-card">
+            <div class="stat-card" data-filter="alternance" title="Cliquez pour filtrer les offres en alternance">
                 <div class="stat-icon">
                     <i class="fas fa-graduation-cap"></i>
                 </div>
@@ -486,7 +555,7 @@
                     <div class="stat-label">Alternance</div>
                 </div>
             </div>
-            <div class="stat-card">
+            <div class="stat-card" data-filter="cdi" title="Cliquez pour filtrer les offres en CDI">
                 <div class="stat-icon">
                     <i class="fas fa-briefcase"></i>
                 </div>
@@ -495,7 +564,7 @@
                     <div class="stat-label">CDI</div>
                 </div>
             </div>
-            <div class="stat-card">
+            <div class="stat-card" data-filter="cdd" title="Cliquez pour filtrer les offres en CDD">
                 <div class="stat-icon">
                     <i class="fas fa-clock"></i>
                 </div>
@@ -504,7 +573,7 @@
                     <div class="stat-label">CDD</div>
                 </div>
             </div>
-            <div class="stat-card">
+            <div class="stat-card" data-filter="stage" title="Cliquez pour filtrer les offres de stage">
                 <div class="stat-icon">
                     <i class="fas fa-user-graduate"></i>
                 </div>
@@ -513,7 +582,7 @@
                     <div class="stat-label">Stage</div>
                 </div>
             </div>
-            <div class="stat-card">
+            <div class="stat-card" data-filter="sans-diplome" title="Cliquez pour filtrer les offres sans diplôme requis">
                 <div class="stat-icon">
                     <i class="fas fa-user-check"></i>
                 </div>
@@ -522,7 +591,7 @@
                     <div class="stat-label">Sans diplôme</div>
                 </div>
             </div>
-            <div class="stat-card">
+            <div class="stat-card" data-filter="junior" title="Cliquez pour filtrer les offres junior">
                 <div class="stat-icon">
                     <i class="fas fa-rocket"></i>
                 </div>
@@ -551,6 +620,18 @@
         </div>
         <div class="search-results-info" id="searchResultsInfo"></div>
     </div>
+</div>
+
+<!-- Bannière de filtre actif -->
+<div class="filter-info-banner" id="filterBanner">
+    <div class="filter-info-text">
+        <i class="fas fa-filter"></i>
+        <span id="filterText">Filtre actif</span>
+    </div>
+    <button class="clear-filter-btn" id="clearFilterBtn">
+        <i class="fas fa-times"></i>
+        Effacer le filtre
+    </button>
 </div>
 
 <div class="jobs-container" id="jobsContainer">
@@ -604,7 +685,6 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
-<script src="https://cdn.jsdelivr.net/npm/natural@6.12.0/dist/natural.min.js"></script>
 
 <script>
 // Récupérer la clé API Groq depuis le serveur
@@ -803,7 +883,8 @@ Analysez le CONTEXTE GLOBAL, pas seulement les mots-clés isolés.`;
             
             // Environnements junior-friendly
             { pattern: /équipe\s+jeune|startup|scale[-\s]?up/i, weight: 1 },
-            { pattern: /innovation|créativité|dynamique/i, weight: 1 },];
+            { pattern: /innovation|créativité|dynamique/i, weight: 1 }
+        ];
 
         const seniorIndicators = [
             { pattern: /senior|expert|lead|chef/i, weight: 3 },
@@ -1139,10 +1220,20 @@ class JobsPagination {
         this.clearButton = document.getElementById('clearSearch');
         this.searchResultsInfo = document.getElementById('searchResultsInfo');
         
+        // Éléments de filtre
+        this.filterBanner = document.getElementById('filterBanner');
+        this.filterText = document.getElementById('filterText');
+        this.clearFilterBtn = document.getElementById('clearFilterBtn');
+        this.statCards = document.querySelectorAll('.stat-card');
+        
+        // État du filtre actuel
+        this.currentFilter = null;
+        this.activeStatCard = null;
+        
         // Initialiser les analyseurs
         this.smartSearch = new SmartJobSearch();
         this.groqAnalyzer = new GroqContextualAnalyzer({
-            apiKey: window.GROQ_API_KEY || 'demo-key', // Utiliser la clé du serveur
+            apiKey: window.GROQ_API_KEY || 'demo-key',
             batchSize: 6
         });
         
@@ -1152,12 +1243,13 @@ class JobsPagination {
         
         this.init();
         this.initSearch();
+        this.initStatFilters();
         this.calculateStats();
         
         // Lancer l'analyse contextuelle Groq de manière discrète
         setTimeout(() => {
             this.startGroqAnalysis();
-        }, 1000); // Délai pour permettre à la page de se charger complètement
+        }, 1000);
     }
 
     init() {
@@ -1189,134 +1281,49 @@ class JobsPagination {
         });
     }
 
-    async startGroqAnalysis() {
-        if (this.groqAnalysisInProgress) return;
-        
-        try {
-            this.groqAnalysisInProgress = true;
-            
-            // Analyse discrète en arrière-plan
-            const jobsData = Array.from(this.allJobs).map(jobElement => ({
-                title: jobElement.querySelector('.job-title')?.textContent || '',
-                company: jobElement.querySelector('.job-company')?.textContent || '',
-                description: jobElement.querySelector('.job-description-text')?.textContent || ''
-            }));
-            
-            // Lancer l'analyse silencieusement
-            const analyses = await this.groqAnalyzer.analyzeBatchContextual(jobsData);
-            
-            // Stocker les résultats
-            analyses.forEach((analysis, index) => {
-                this.groqAnalysisResults.set(index, analysis);
+    initStatFilters() {
+        // Ajouter les événements de clic sur les cartes de statistiques
+        this.statCards.forEach(card => {
+            card.addEventListener('click', () => {
+                const filterType = card.dataset.filter;
+                this.toggleStatFilter(filterType, card);
             });
-            
-            // Mettre à jour les statistiques sans indication visuelle
-            this.calculateStatsWithGroq();
-            
-        } catch (error) {
-            console.error('Groq analysis failed:', error);
-            // En cas d'erreur, continuer avec l'analyse basique
-            this.calculateStats();
-        } finally {
-            this.groqAnalysisInProgress = false;
-        }
-    }
-
-    calculateStatsWithGroq() {
-        const stats = {
-            alternance: 0,
-            cdi: 0,
-            cdd: 0,
-            stage: 0,
-            sansDiplome: 0,
-            junior: 0
-        };
-
-        this.allJobs.forEach((job, index) => {
-            const jobText = this.smartSearch.getJobElementText(job);
-            
-            // Analyser le type de contrat (règles simples)
-            if (jobText.includes('alternance')) stats.alternance++;
-            if (jobText.includes('cdi')) stats.cdi++;
-            if (jobText.includes('cdd')) stats.cdd++;
-            if (jobText.includes('stage')) stats.stage++;
-            
-            // Utiliser les résultats Groq pour diplôme et junior
-            const groqAnalysis = this.groqAnalysisResults.get(index);
-            if (groqAnalysis) {
-                if (groqAnalysis.noDiplomaRequired) {
-                    stats.sansDiplome++;
-                }
-                if (groqAnalysis.isJunior) {
-                    stats.junior++;
-                }
-            }
         });
 
-        this.updateStatsDisplay(stats);
+        // Événement pour effacer le filtre
+        this.clearFilterBtn.addEventListener('click', () => {
+            this.clearStatFilter();
+        });
     }
 
-    performSmartSearch(query) {
-        if (!query.trim()) {
-            this.clearSearch();
+    toggleStatFilter(filterType, statCard) {
+        // Si on clique sur le même filtre, on le désactive
+        if (this.currentFilter === filterType) {
+            this.clearStatFilter();
             return;
         }
 
-        // Préparer les données pour la recherche
-        const jobsData = this.getAllJobsData();
-        
-        // Utiliser la recherche intelligente
-        const results = this.smartSearch.smartSearch(query, jobsData);
-        
-        // Convertir en format attendu
-        this.filteredJobs = results.map(result => ({
-            element: this.allJobs[result.index],
-            score: result.score,
-            terms: result.matchedTerms || []
-        }));
-
-        this.updateSearchResults();
-    }
-
-    getAllJobsData() {
-        return Array.from(this.allJobs).map(jobElement => ({
-            poste: jobElement.querySelector('.job-title')?.textContent || '',
-            entreprise: jobElement.querySelector('.job-company')?.textContent || '',
-            description_nettoyee: jobElement.querySelector('.job-description-text')?.textContent || '',
-            contrat: Array.from(jobElement.querySelectorAll('.job-info-item span'))[1]?.textContent || ''
-        }));
-    }
-
-    updateSearchResults() {
-        // Masquer toutes les offres
-        this.allJobs.forEach(job => {
-            job.classList.add('hidden');
-        });
-
-        // Mettre à jour les compteurs
-        this.totalJobs = this.filteredJobs.length;
-        this.totalPages = Math.ceil(this.totalJobs / this.jobsPerPage);
-        this.currentPage = 1;
-
-        // Afficher les informations de recherche
-        if (this.filteredJobs.length === 0) {
-            this.searchResultsInfo.innerHTML = '<span style="color: #ef4444;">Aucune offre trouvée pour cette recherche</span>';
-        } else {
-            const searchTerms = this.filteredJobs[0]?.terms?.join(', ') || '';
-            this.searchResultsInfo.innerHTML = `
-                <span style="color: #10b981;">
-                    ${this.filteredJobs.length} offre${this.filteredJobs.length > 1 ? 's' : ''} trouvée${this.filteredJobs.length > 1 ? 's' : ''}
-                    ${searchTerms ? ` - Mots-clés détectés: ${searchTerms}` : ''}
-                </span>
-            `;
+        // Effacer la recherche si elle était active
+        if (this.searchInput.value.trim()) {
+            this.searchInput.value = '';
+            this.clearButton.style.display = 'none';
+            this.searchResultsInfo.innerHTML = '';
         }
 
-        // Mettre à jour le compteur principal
-        document.getElementById('totalCount').textContent = `${this.filteredJobs.length} offre${this.filteredJobs.length > 1 ? 's' : ''}`;
+        // Désactiver l'ancien filtre
+        if (this.activeStatCard) {
+            this.activeStatCard.classList.remove('active');
+        }
 
-        // Mettre à jour les statistiques pour les résultats filtrés
-        this.updateSearchStats();
+        // Activer le nouveau filtre
+        this.currentFilter = filterType;
+        this.activeStatCard = statCard;
+        statCard.classList.add('active');
 
+        // Appliquer le filtre
+        this.applyStatFilter(filterType);
+        
+        // Afficher la bannière de filtre
         this.showFilteredPage(1);
         this.renderPagination();
     }
@@ -1458,7 +1465,7 @@ class JobsPagination {
         
         button.addEventListener('click', (e) => {
             e.preventDefault();
-            if (this.searchInput.value.trim()) {
+            if (this.searchInput.value.trim() || this.currentFilter) {
                 this.showFilteredPage(page);
             } else {
                 this.showPage(page);
@@ -1477,7 +1484,7 @@ class JobsPagination {
         if (!isDisabled) {
             button.addEventListener('click', (e) => {
                 e.preventDefault();
-                if (this.searchInput.value.trim()) {
+                if (this.searchInput.value.trim() || this.currentFilter) {
                     this.showFilteredPage(targetPage);
                 } else {
                     this.showPage(targetPage);
@@ -1537,7 +1544,7 @@ class JobsPagination {
     }
 
     updateSearchStats() {
-        if (this.filteredJobs.length === 0 || this.searchInput.value.trim() === '') {
+        if (this.filteredJobs.length === 0 || (this.searchInput.value.trim() === '' && !this.currentFilter)) {
             if (this.groqAnalysisResults.size > 0) {
                 this.calculateStatsWithGroq();
             } else {
@@ -1595,8 +1602,323 @@ class JobsPagination {
 
 // Initialiser la pagination quand la page est chargée
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialiser la pagination avec analyse Groq discrète
+    // Initialiser la pagination avec analyse Groq discrète et filtres cliquables
     new JobsPagination(8);
 });
 </script>
-{% endblock %}
+{% endblock %}Banner(filterType);
+    }
+
+    applyStatFilter(filterType) {
+        this.filteredJobs = [];
+
+        this.allJobs.forEach((jobElement, index) => {
+            let matchesFilter = false;
+            const jobText = this.smartSearch.getJobElementText(jobElement);
+
+            switch (filterType) {
+                case 'alternance':
+                    matchesFilter = jobText.includes('alternance');
+                    break;
+                case 'cdi':
+                    matchesFilter = jobText.includes('cdi');
+                    break;
+                case 'cdd':
+                    matchesFilter = jobText.includes('cdd');
+                    break;
+                case 'stage':
+                    matchesFilter = jobText.includes('stage');
+                    break;
+                case 'sans-diplome':
+                    // Utiliser l'analyse Groq si disponible
+                    const groqAnalysis = this.groqAnalysisResults.get(index);
+                    if (groqAnalysis) {
+                        matchesFilter = groqAnalysis.noDiplomaRequired;
+                    } else {
+                        // Fallback rapide
+                        matchesFilter = jobText.includes('sans diplôme') || 
+                                      jobText.includes('formation assurée') ||
+                                      jobText.includes('nous vous formons') ||
+                                      (jobText.includes('alternance') && !jobText.includes('bac+'));
+                    }
+                    break;
+                case 'junior':
+                    // Utiliser l'analyse Groq si disponible
+                    const groqAnalysisJunior = this.groqAnalysisResults.get(index);
+                    if (groqAnalysisJunior) {
+                        matchesFilter = groqAnalysisJunior.isJunior;
+                    } else {
+                        // Fallback rapide
+                        matchesFilter = jobText.includes('junior') || 
+                                      jobText.includes('débutant') ||
+                                      jobText.includes('première expérience') ||
+                                      jobText.includes('entry level');
+                    }
+                    break;
+            }
+
+            if (matchesFilter) {
+                this.filteredJobs.push({
+                    element: jobElement,
+                    score: 1,
+                    terms: [filterType]
+                });
+            }
+        });
+
+        this.updateFilterResults();
+    }
+
+    showFilterBanner(filterType) {
+        const filterLabels = {
+            'alternance': 'Offres en alternance',
+            'cdi': 'Offres en CDI',
+            'cdd': 'Offres en CDD',
+            'stage': 'Offres de stage',
+            'sans-diplome': 'Offres sans diplôme requis',
+            'junior': 'Offres junior'
+        };
+
+        this.filterText.textContent = filterLabels[filterType] || 'Filtre actif';
+        this.filterBanner.classList.add('show');
+    }
+
+    clearStatFilter() {
+        // Désactiver le filtre actuel
+        this.currentFilter = null;
+        if (this.activeStatCard) {
+            this.activeStatCard.classList.remove('active');
+            this.activeStatCard = null;
+        }
+
+        // Masquer la bannière
+        this.filterBanner.classList.remove('show');
+
+        // Restaurer toutes les offres
+        this.clearSearch();
+    }
+
+    updateFilterResults() {
+        // Masquer toutes les offres
+        this.allJobs.forEach(job => {
+            job.classList.add('hidden');
+        });
+
+        // Mettre à jour les compteurs
+        this.totalJobs = this.filteredJobs.length;
+        this.totalPages = Math.ceil(this.totalJobs / this.jobsPerPage);
+        this.currentPage = 1;
+
+        // Afficher les informations de filtre
+        if (this.filteredJobs.length === 0) {
+            this.searchResultsInfo.innerHTML = '<span style="color: #ef4444;">Aucune offre trouvée pour ce filtre</span>';
+        } else {
+            this.searchResultsInfo.innerHTML = `
+                <span style="color: #10b981;">
+                    ${this.filteredJobs.length} offre${this.filteredJobs.length > 1 ? 's' : ''} correspond${this.filteredJobs.length > 1 ? 'ent' : ''} au filtre
+                </span>
+            `;
+        }
+
+        // Mettre à jour le compteur principal
+        document.getElementById('totalCount').textContent = `${this.filteredJobs.length} offre${this.filteredJobs.length > 1 ? 's' : ''}`;
+
+        // Mettre à jour les statistiques pour les résultats filtrés
+        this.updateFilterStats();
+
+        this.showFilteredPage(1);
+        this.renderPagination();
+    }
+
+    updateFilterStats() {
+        if (this.filteredJobs.length === 0 || !this.currentFilter) {
+            if (this.groqAnalysisResults.size > 0) {
+                this.calculateStatsWithGroq();
+            } else {
+                this.calculateStats();
+            }
+            return;
+        }
+
+        // Calculer les stats pour les résultats filtrés
+        const stats = {
+            alternance: 0,
+            cdi: 0,
+            cdd: 0,
+            stage: 0,
+            sansDiplome: 0,
+            junior: 0
+        };
+
+        this.filteredJobs.forEach(jobObj => {
+            const jobText = this.smartSearch.getJobElementText(jobObj.element);
+            const jobIndex = Array.from(this.allJobs).indexOf(jobObj.element);
+            
+            // Types de contrat (analyse rapide par mots-clés)
+            if (jobText.includes('alternance')) stats.alternance++;
+            if (jobText.includes('cdi')) stats.cdi++;
+            if (jobText.includes('cdd')) stats.cdd++;
+            if (jobText.includes('stage')) stats.stage++;
+            
+            // Utiliser Groq si disponible pour diplôme et junior
+            const groqAnalysis = this.groqAnalysisResults.get(jobIndex);
+            if (groqAnalysis) {
+                if (groqAnalysis.noDiplomaRequired) stats.sansDiplome++;
+                if (groqAnalysis.isJunior) stats.junior++;
+            } else {
+                // Fallback rapide pour le filtrage en temps réel
+                if (jobText.includes('sans diplôme') || 
+                    jobText.includes('formation assurée') ||
+                    jobText.includes('nous vous formons') ||
+                    (jobText.includes('alternance') && !jobText.includes('bac+'))) {
+                    stats.sansDiplome++;
+                }
+                if (jobText.includes('junior') || 
+                    jobText.includes('débutant') ||
+                    jobText.includes('première expérience') ||
+                    jobText.includes('entry level')) {
+                    stats.junior++;
+                }
+            }
+        });
+
+        // Mise à jour instantanée des statistiques
+        this.updateStatsDisplay(stats);
+    }
+
+    async startGroqAnalysis() {
+        if (this.groqAnalysisInProgress) return;
+        
+        try {
+            this.groqAnalysisInProgress = true;
+            
+            // Analyse discrète en arrière-plan
+            const jobsData = Array.from(this.allJobs).map(jobElement => ({
+                title: jobElement.querySelector('.job-title')?.textContent || '',
+                company: jobElement.querySelector('.job-company')?.textContent || '',
+                description: jobElement.querySelector('.job-description-text')?.textContent || ''
+            }));
+            
+            // Lancer l'analyse silencieusement
+            const analyses = await this.groqAnalyzer.analyzeBatchContextual(jobsData);
+            
+            // Stocker les résultats
+            analyses.forEach((analysis, index) => {
+                this.groqAnalysisResults.set(index, analysis);
+            });
+            
+            // Mettre à jour les statistiques sans indication visuelle
+            this.calculateStatsWithGroq();
+            
+        } catch (error) {
+            console.error('Groq analysis failed:', error);
+            // En cas d'erreur, continuer avec l'analyse basique
+            this.calculateStats();
+        } finally {
+            this.groqAnalysisInProgress = false;
+        }
+    }
+
+    calculateStatsWithGroq() {
+        const stats = {
+            alternance: 0,
+            cdi: 0,
+            cdd: 0,
+            stage: 0,
+            sansDiplome: 0,
+            junior: 0
+        };
+
+        this.allJobs.forEach((job, index) => {
+            const jobText = this.smartSearch.getJobElementText(job);
+            
+            // Analyser le type de contrat (règles simples)
+            if (jobText.includes('alternance')) stats.alternance++;
+            if (jobText.includes('cdi')) stats.cdi++;
+            if (jobText.includes('cdd')) stats.cdd++;
+            if (jobText.includes('stage')) stats.stage++;
+            
+            // Utiliser les résultats Groq pour diplôme et junior
+            const groqAnalysis = this.groqAnalysisResults.get(index);
+            if (groqAnalysis) {
+                if (groqAnalysis.noDiplomaRequired) {
+                    stats.sansDiplome++;
+                }
+                if (groqAnalysis.isJunior) {
+                    stats.junior++;
+                }
+            }
+        });
+
+        this.updateStatsDisplay(stats);
+    }
+
+    performSmartSearch(query) {
+        if (!query.trim()) {
+            this.clearSearch();
+            return;
+        }
+
+        // Effacer le filtre statistique si actif
+        if (this.currentFilter) {
+            this.clearStatFilter();
+        }
+
+        // Préparer les données pour la recherche
+        const jobsData = this.getAllJobsData();
+        
+        // Utiliser la recherche intelligente
+        const results = this.smartSearch.smartSearch(query, jobsData);
+        
+        // Convertir en format attendu
+        this.filteredJobs = results.map(result => ({
+            element: this.allJobs[result.index],
+            score: result.score,
+            terms: result.matchedTerms || []
+        }));
+
+        this.updateSearchResults();
+    }
+
+    getAllJobsData() {
+        return Array.from(this.allJobs).map(jobElement => ({
+            poste: jobElement.querySelector('.job-title')?.textContent || '',
+            entreprise: jobElement.querySelector('.job-company')?.textContent || '',
+            description_nettoyee: jobElement.querySelector('.job-description-text')?.textContent || '',
+            contrat: Array.from(jobElement.querySelectorAll('.job-info-item span'))[1]?.textContent || ''
+        }));
+    }
+
+    updateSearchResults() {
+        // Masquer toutes les offres
+        this.allJobs.forEach(job => {
+            job.classList.add('hidden');
+        });
+
+        // Mettre à jour les compteurs
+        this.totalJobs = this.filteredJobs.length;
+        this.totalPages = Math.ceil(this.totalJobs / this.jobsPerPage);
+        this.currentPage = 1;
+
+        // Afficher les informations de recherche
+        if (this.filteredJobs.length === 0) {
+            this.searchResultsInfo.innerHTML = '<span style="color: #ef4444;">Aucune offre trouvée pour cette recherche</span>';
+        } else {
+            const searchTerms = this.filteredJobs[0]?.terms?.join(', ') || '';
+            this.searchResultsInfo.innerHTML = `
+                <span style="color: #10b981;">
+                    ${this.filteredJobs.length} offre${this.filteredJobs.length > 1 ? 's' : ''} trouvée${this.filteredJobs.length > 1 ? 's' : ''}
+                    ${searchTerms ? ` - Mots-clés détectés: ${searchTerms}` : ''}
+                </span>
+            `;
+        }
+
+        // Mettre à jour le compteur principal
+        document.getElementById('totalCount').textContent = `${this.filteredJobs.length} offre${this.filteredJobs.length > 1 ? 's' : ''}`;
+
+        // Mettre à jour les statistiques pour les résultats filtrés
+        this.updateSearchStats();
+
+        this.showFilteredPage(1);
+        this.renderPagination();
+    }
