@@ -603,19 +603,244 @@
     </nav>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
+<script src="https://cdn.jsdelivr.net/npm/natural@6.12.0/dist/natural.min.js"></script>
+
 <script>
+class SmartJobSearch {
+    constructor() {
+        // Synonymes métier pour améliorer la recherche
+        this.synonyms = {
+            'data': ['données', 'database', 'base de données', 'bdd'],
+            'analyste': ['analyst', 'analyse', 'analytics', 'analytique'],
+            'développeur': ['dev', 'developer', 'programmeur', 'codeur', 'développeuse'],
+            'alternance': ['apprentissage', 'contrat pro', 'formation', 'apprenti'],
+            'stage': ['stagiaire', 'internship', 'période', 'intern'],
+            'junior': ['débutant', 'entry level', 'première expérience', 'jeune diplôme'],
+            'senior': ['expérimenté', 'expert', 'confirmé', 'lead'],
+            'python': ['py', 'django', 'flask', 'pandas'],
+            'javascript': ['js', 'react', 'vue', 'angular', 'node'],
+            'sql': ['mysql', 'postgresql', 'oracle', 'database']
+        };
+        
+        // Configuration Fuse.js pour recherche floue
+        this.fuseConfig = {
+            keys: [
+                { name: 'poste', weight: 0.4 },
+                { name: 'description_nettoyee', weight: 0.3 },
+                { name: 'contrat', weight: 0.2 },
+                { name: 'entreprise', weight: 0.1 }
+            ],
+            threshold: 0.4,
+            includeScore: true,
+            minMatchCharLength: 2,
+            ignoreLocation: true
+        };
+
+        // Mots vides français
+        this.stopWords = new Set([
+            'je', 'tu', 'il', 'elle', 'nous', 'vous', 'ils', 'elles', 
+            'le', 'la', 'les', 'un', 'une', 'des', 'du', 'de', 'et', 
+            'ou', 'où', 'que', 'qui', 'quoi', 'pour', 'par', 'avec', 
+            'dans', 'sur', 'chez', 'vers', 'à', 'en', 'ce', 'mon', 
+            'ma', 'son', 'sa', 'notre', 'votre', 'leur', 'cherche', 
+            'recherche', 'poste', 'emploi', 'travail', 'job'
+        ]);
+    }
+
+    // Analyse intelligente de la requête
+    analyzeQuery(query) {
+        const tokens = this.tokenize(query);
+        const expanded = this.expandSynonyms(tokens);
+        const intent = this.detectIntent(query);
+        
+        return {
+            original: tokens,
+            expanded: expanded,
+            intent: intent
+        };
+    }
+
+    // Tokenisation et nettoyage
+    tokenize(text) {
+        return text.toLowerCase()
+            .replace(/[^\w\sàáâãäåæçèéêëìíîïñòóôõöøùúûüýÿ]/g, ' ')
+            .split(/\s+/)
+            .filter(token => token.length > 1)
+            .filter(token => !this.stopWords.has(token));
+    }
+
+    // Expansion avec synonymes
+    expandSynonyms(tokens) {
+        const expanded = new Set(tokens);
+        
+        tokens.forEach(token => {
+            Object.keys(this.synonyms).forEach(key => {
+                if (key.includes(token) || this.synonyms[key].includes(token)) {
+                    expanded.add(key);
+                    this.synonyms[key].forEach(syn => expanded.add(syn));
+                }
+            });
+        });
+        
+        return Array.from(expanded);
+    }
+
+    // Détection d'intention dans la requête
+    detectIntent(query) {
+        const intent = {};
+        const lowerQuery = query.toLowerCase();
+        
+        // Détection de localisation
+        const locationMatch = lowerQuery.match(/(?:à|dans|région|ville)\s+(\w+)/i);
+        if (locationMatch) intent.location = locationMatch[1];
+        
+        // Détection de type de contrat
+        const contractMatch = lowerQuery.match(/(cdi|cdd|stage|alternance|freelance|temps partiel|temps plein)/i);
+        if (contractMatch) intent.contract = contractMatch[1];
+        
+        // Détection de niveau
+        const levelMatch = lowerQuery.match(/(junior|senior|débutant|expérimenté|confirmé)/i);
+        if (levelMatch) intent.level = levelMatch[1];
+        
+        return intent;
+    }
+
+    // Recherche hybride améliorée
+    smartSearch(query, jobsData) {
+        const analysis = this.analyzeQuery(query);
+        
+        // 1. Recherche exacte avec termes étendus
+        const exactResults = this.exactSearch(analysis.expanded, jobsData);
+        
+        // 2. Recherche floue avec Fuse.js
+        const fuse = new Fuse(jobsData, this.fuseConfig);
+        const fuseResults = fuse.search(query);
+        
+        // 3. Combiner et scorer les résultats
+        const combinedResults = this.combineResults(exactResults, fuseResults, analysis.intent);
+        
+        return combinedResults;
+    }
+
+    exactSearch(expandedTerms, jobsData) {
+        return jobsData.map((job, index) => {
+            const jobText = this.getJobSearchText(job);
+            let score = 0;
+            let matchedTerms = [];
+            
+            expandedTerms.forEach(term => {
+                if (jobText.includes(term.toLowerCase())) {
+                    // Score plus élevé si trouvé dans le titre
+                    if (job.poste.toLowerCase().includes(term.toLowerCase())) {
+                        score += 5;
+                    } else {
+                        score += 2;
+                    }
+                    matchedTerms.push(term);
+                }
+            });
+            
+            return { 
+                index, 
+                score, 
+                matchedTerms, 
+                type: 'exact'
+            };
+        }).filter(result => result.score > 0);
+    }
+
+    combineResults(exactResults, fuseResults, intent) {
+        const resultMap = new Map();
+        
+        // Ajouter résultats exacts
+        exactResults.forEach(result => {
+            resultMap.set(result.index, {
+                index: result.index,
+                score: result.score,
+                matchedTerms: result.matchedTerms,
+                types: ['exact']
+            });
+        });
+        
+        // Ajouter résultats Fuse.js
+        fuseResults.forEach(result => {
+            const index = result.refIndex;
+            const fuseScore = (1 - result.score) * 3; // Convertir en score positif
+            
+            if (resultMap.has(index)) {
+                resultMap.get(index).score += fuseScore;
+                resultMap.get(index).types.push('fuzzy');
+            } else {
+                resultMap.set(index, {
+                    index: index,
+                    score: fuseScore,
+                    matchedTerms: [],
+                    types: ['fuzzy']
+                });
+            }
+        });
+        
+        // Appliquer bonus d'intention
+        this.applyIntentBonus(resultMap, intent);
+        
+        // Trier par score décroissant
+        return Array.from(resultMap.values())
+            .sort((a, b) => b.score - a.score);
+    }
+
+    applyIntentBonus(resultMap, intent) {
+        if (Object.keys(intent).length === 0) return;
+        
+        resultMap.forEach((result, index) => {
+            const jobElement = document.querySelectorAll('.job-card')[index];
+            if (!jobElement) return;
+            
+            const jobText = this.getJobElementText(jobElement);
+            
+            // Bonus si l'intention correspond
+            if (intent.contract && jobText.includes(intent.contract.toLowerCase())) {
+                result.score += 3;
+            }
+            if (intent.level && jobText.includes(intent.level.toLowerCase())) {
+                result.score += 2;
+            }
+            if (intent.location && jobText.includes(intent.location.toLowerCase())) {
+                result.score += 2;
+            }
+        });
+    }
+
+    getJobSearchText(job) {
+        return `${job.poste} ${job.entreprise} ${job.description_nettoyee} ${job.contrat}`.toLowerCase();
+    }
+
+    getJobElementText(jobElement) {
+        const title = jobElement.querySelector('.job-title')?.textContent || '';
+        const company = jobElement.querySelector('.job-company')?.textContent || '';
+        const description = jobElement.querySelector('.job-description-text')?.textContent || '';
+        const infoItems = Array.from(jobElement.querySelectorAll('.job-info-item span'))
+            .map(span => span.textContent).join(' ');
+        
+        return `${title} ${company} ${description} ${infoItems}`.toLowerCase();
+    }
+}
+
 class JobsPagination {
-    constructor(jobsPerPage = 6) {
+    constructor(jobsPerPage = 8) {
         this.jobsPerPage = jobsPerPage;
         this.currentPage = 1;
         this.allJobs = document.querySelectorAll('.job-card');
-        this.filteredJobs = [...this.allJobs]; // Copie pour les résultats filtrés
+        this.filteredJobs = [...this.allJobs];
         this.totalJobs = this.allJobs.length;
         this.totalPages = Math.ceil(this.totalJobs / this.jobsPerPage);
         
         this.searchInput = document.getElementById('searchInput');
         this.clearButton = document.getElementById('clearSearch');
         this.searchResultsInfo = document.getElementById('searchResultsInfo');
+        
+        // Initialiser la recherche intelligente
+        this.smartSearch = new SmartJobSearch();
         
         this.init();
         this.initSearch();
@@ -628,93 +853,58 @@ class JobsPagination {
     }
 
     initSearch() {
-        // Recherche en temps réel avec debounce
         let searchTimeout;
         this.searchInput.addEventListener('input', (e) => {
             clearTimeout(searchTimeout);
             searchTimeout = setTimeout(() => {
-                this.performSearch(e.target.value);
+                this.performSmartSearch(e.target.value);
             }, 300);
             
-            // Afficher/masquer le bouton de suppression
             this.clearButton.style.display = e.target.value ? 'flex' : 'none';
         });
 
-        // Bouton de suppression
         this.clearButton.addEventListener('click', () => {
             this.searchInput.value = '';
             this.clearButton.style.display = 'none';
             this.clearSearch();
         });
 
-        // Recherche sur Entrée
         this.searchInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
-                this.performSearch(e.target.value);
+                this.performSmartSearch(e.target.value);
             }
         });
     }
 
-    performSearch(query) {
+    performSmartSearch(query) {
         if (!query.trim()) {
             this.clearSearch();
             return;
         }
 
-        const searchTerms = this.extractSearchTerms(query.toLowerCase());
-        this.filteredJobs = [];
-
-        this.allJobs.forEach(job => {
-            const jobText = this.getJobSearchableText(job);
-            const matches = this.calculateJobRelevance(jobText, searchTerms);
-            
-            if (matches.score > 0) {
-                this.filteredJobs.push({ element: job, score: matches.score, terms: matches.matchedTerms });
-            }
-        });
-
-        // Trier par score de pertinence
-        this.filteredJobs.sort((a, b) => b.score - a.score);
+        // Préparer les données pour la recherche
+        const jobsData = this.getAllJobsData();
         
+        // Utiliser la recherche intelligente
+        const results = this.smartSearch.smartSearch(query, jobsData);
+        
+        // Convertir en format attendu
+        this.filteredJobs = results.map(result => ({
+            element: this.allJobs[result.index],
+            score: result.score,
+            terms: result.matchedTerms || []
+        }));
+
         this.updateSearchResults();
     }
 
-    extractSearchTerms(query) {
-        // Supprimer les mots de liaison et extraire les mots-clés pertinents
-        const stopWords = ['je', 'tu', 'il', 'elle', 'nous', 'vous', 'ils', 'elles', 'le', 'la', 'les', 'un', 'une', 'des', 'du', 'de', 'et', 'ou', 'où', 'que', 'qui', 'quoi', 'dont', 'pour', 'par', 'avec', 'sans', 'dans', 'sur', 'sous', 'entre', 'chez', 'vers', 'à', 'au', 'aux', 'en', 'y', 'ce', 'cette', 'ces', 'mon', 'ma', 'mes', 'ton', 'ta', 'tes', 'son', 'sa', 'ses', 'notre', 'nos', 'votre', 'vos', 'leur', 'leurs', 'cherche', 'recherche', 'poste', 'emploi', 'travail', 'pourrais', 'utiliser', 'faire'];
-        
-        return query
-            .split(/[\s,;.!?]+/)
-            .filter(term => term.length > 1 && !stopWords.includes(term))
-            .map(term => term.trim());
-    }
-
-    getJobSearchableText(jobElement) {
-        // Extraire tout le texte recherchable de l'offre
-        const title = jobElement.querySelector('.job-title')?.textContent || '';
-        const company = jobElement.querySelector('.job-company')?.textContent || '';
-        const description = jobElement.querySelector('.job-description-text')?.textContent || '';
-        const infoItems = Array.from(jobElement.querySelectorAll('.job-info-item span'))
-            .map(span => span.textContent).join(' ');
-        
-        return `${title} ${company} ${description} ${infoItems}`.toLowerCase();
-    }
-
-    calculateJobRelevance(jobText, searchTerms) {
-        let score = 0;
-        const matchedTerms = [];
-
-        searchTerms.forEach(term => {
-            if (jobText.includes(term)) {
-                matchedTerms.push(term);
-                // Score plus élevé pour les correspondances exactes
-                if (jobText.includes(term)) score += 2;
-                // Score bonus pour les correspondances dans le titre
-                if (jobText.split(' ').slice(0, 10).join(' ').includes(term)) score += 1;
-            }
-        });
-
-        return { score, matchedTerms };
+    getAllJobsData() {
+        return Array.from(this.allJobs).map(jobElement => ({
+            poste: jobElement.querySelector('.job-title')?.textContent || '',
+            entreprise: jobElement.querySelector('.job-company')?.textContent || '',
+            description_nettoyee: jobElement.querySelector('.job-description-text')?.textContent || '',
+            contrat: Array.from(jobElement.querySelectorAll('.job-info-item span'))[1]?.textContent || ''
+        }));
     }
 
     updateSearchResults() {
@@ -732,7 +922,13 @@ class JobsPagination {
         if (this.filteredJobs.length === 0) {
             this.searchResultsInfo.innerHTML = '<span style="color: #ef4444;">Aucune offre trouvée pour cette recherche</span>';
         } else {
-            this.searchResultsInfo.innerHTML = `<span style="color: #10b981;">${this.filteredJobs.length} offre${this.filteredJobs.length > 1 ? 's' : ''} trouvée${this.filteredJobs.length > 1 ? 's' : ''}</span>`;
+            const searchTerms = this.filteredJobs[0]?.terms?.join(', ') || '';
+            this.searchResultsInfo.innerHTML = `
+                <span style="color: #10b981;">
+                    ${this.filteredJobs.length} offre${this.filteredJobs.length > 1 ? 's' : ''} trouvée${this.filteredJobs.length > 1 ? 's' : ''}
+                    ${searchTerms ? ` - Mots-clés détectés: ${searchTerms}` : ''}
+                </span>
+            `;
         }
 
         // Mettre à jour le compteur principal
@@ -773,6 +969,236 @@ class JobsPagination {
         // Afficher les offres de la page courante
         const start = (page - 1) * this.jobsPerPage;
         const end = start + this.jobsPerPage;
+        
+        for (let i = start; i < end && i < this.totalJobs; i++) {
+            this.allJobs[i].style.display = 'flex';
+        }
+
+        this.renderPagination();
+    }
+
+    showFilteredPage(page) {
+        this.currentPage = page;
+        
+        // Masquer toutes les offres
+        this.allJobs.forEach(job => {
+            job.style.display = 'none';
+            job.classList.add('hidden');
+        });
+
+        // Afficher les offres filtrées de la page courante
+        const start = (page - 1) * this.jobsPerPage;
+        const end = start + this.jobsPerPage;
+        
+        for (let i = start; i < end && i < this.filteredJobs.length; i++) {
+            this.filteredJobs[i].element.style.display = 'flex';
+            this.filteredJobs[i].element.classList.remove('hidden');
+        }
+
+        this.renderPagination();
+    }
+
+    renderPagination() {
+        const pagination = document.getElementById('pagination');
+        pagination.innerHTML = '';
+
+        if (this.totalPages <= 1) {
+            return;
+        }
+
+        // Bouton précédent
+        const prevButton = this.createNavButton('‹', this.currentPage - 1, this.currentPage === 1);
+        pagination.appendChild(prevButton);
+
+        // Logique de pagination intelligente
+        const pages = this.getPageNumbers();
+        
+        pages.forEach((page, index) => {
+            if (page === '...') {
+                const dots = document.createElement('span');
+                dots.className = 'pagination-dots';
+                dots.textContent = '...';
+                pagination.appendChild(dots);
+            } else {
+                const pageButton = this.createPageButton(page, page === this.currentPage);
+                pagination.appendChild(pageButton);
+            }
+        });
+
+        // Bouton suivant
+        const nextButton = this.createNavButton('›', this.currentPage + 1, this.currentPage === this.totalPages);
+        pagination.appendChild(nextButton);
+    }
+
+    getPageNumbers() {
+        const pages = [];
+        const current = this.currentPage;
+        const total = this.totalPages;
+
+        if (total <= 7) {
+            for (let i = 1; i <= total; i++) {
+                pages.push(i);
+            }
+        } else {
+            pages.push(1);
+
+            if (current <= 4) {
+                for (let i = 2; i <= 5; i++) {
+                    pages.push(i);
+                }
+                pages.push('...');
+                pages.push(total);
+            } else if (current >= total - 3) {
+                pages.push('...');
+                for (let i = total - 4; i <= total; i++) {
+                    pages.push(i);
+                }
+            } else {
+                pages.push('...');
+                for (let i = current - 1; i <= current + 1; i++) {
+                    pages.push(i);
+                }
+                pages.push('...');
+                pages.push(total);
+            }
+        }
+
+        return pages;
+    }
+
+    createPageButton(page, isActive) {
+        const button = document.createElement('a');
+        button.className = `pagination-item ${isActive ? 'active' : ''}`;
+        button.textContent = page;
+        button.href = '#';
+        
+        button.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (this.searchInput.value.trim()) {
+                this.showFilteredPage(page);
+            } else {
+                this.showPage(page);
+            }
+        });
+
+        return button;
+    }
+
+    createNavButton(symbol, targetPage, isDisabled) {
+        const button = document.createElement('a');
+        button.className = `pagination-nav ${isDisabled ? 'disabled' : ''}`;
+        button.innerHTML = symbol;
+        button.href = '#';
+
+        if (!isDisabled) {
+            button.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (this.searchInput.value.trim()) {
+                    this.showFilteredPage(targetPage);
+                } else {
+                    this.showPage(targetPage);
+                }
+            });
+        }
+
+        return button;
+    }
+
+    calculateStats() {
+        const stats = {
+            alternance: 0,
+            cdi: 0,
+            cdd: 0,
+            stage: 0,
+            sansDiplome: 0,
+            junior: 0
+        };
+
+        this.allJobs.forEach(job => {
+            const jobText = this.smartSearch.getJobElementText(job);
+            
+            // Analyser le type de contrat
+            if (jobText.includes('alternance')) stats.alternance++;
+            if (jobText.includes('cdi')) stats.cdi++;
+            if (jobText.includes('cdd')) stats.cdd++;
+            if (jobText.includes('stage')) stats.stage++;
+            
+            // Analyser les exigences
+            if (jobText.includes('sans diplôme') || 
+                jobText.includes('sans diplome') || 
+                jobText.includes('aucun diplôme') ||
+                jobText.includes('pas de diplôme')) {
+                stats.sansDiplome++;
+            }
+            
+            // Analyser le niveau
+            if (jobText.includes('junior') || 
+                jobText.includes('débutant') || 
+                jobText.includes('premier emploi') ||
+                jobText.includes('entry level')) {
+                stats.junior++;
+            }
+        });
+
+        this.updateStatsDisplay(stats);
+    }
+
+    updateStatsDisplay(stats) {
+        document.getElementById('statAlternance').textContent = stats.alternance;
+        document.getElementById('statCDI').textContent = stats.cdi;
+        document.getElementById('statCDD').textContent = stats.cdd;
+        document.getElementById('statStage').textContent = stats.stage;
+        document.getElementById('statSansDiplome').textContent = stats.sansDiplome;
+        document.getElementById('statJunior').textContent = stats.junior;
+    }
+
+    updateSearchStats() {
+        if (this.filteredJobs.length === 0 || this.searchInput.value.trim() === '') {
+            this.calculateStats();
+            return;
+        }
+
+        const stats = {
+            alternance: 0,
+            cdi: 0,
+            cdd: 0,
+            stage: 0,
+            sansDiplome: 0,
+            junior: 0
+        };
+
+        this.filteredJobs.forEach(jobObj => {
+            const jobText = this.smartSearch.getJobElementText(jobObj.element);
+            
+            if (jobText.includes('alternance')) stats.alternance++;
+            if (jobText.includes('cdi')) stats.cdi++;
+            if (jobText.includes('cdd')) stats.cdd++;
+            if (jobText.includes('stage')) stats.stage++;
+            
+            if (jobText.includes('sans diplôme') || 
+                jobText.includes('sans diplome') || 
+                jobText.includes('aucun diplôme') ||
+                jobText.includes('pas de diplôme')) {
+                stats.sansDiplome++;
+            }
+            
+            if (jobText.includes('junior') || 
+                jobText.includes('débutant') || 
+                jobText.includes('premier emploi') ||
+                jobText.includes('entry level')) {
+                stats.junior++;
+            }
+        });
+
+        this.updateStatsDisplay(stats);
+    }
+}
+
+// Initialiser la pagination quand la page est chargée
+document.addEventListener('DOMContentLoaded', function() {
+    new JobsPagination(8); // 8 offres par page
+});
+</script> this.jobsPerPage;
         
         for (let i = start; i < end && i < this.totalJobs; i++) {
             this.allJobs[i].style.display = 'flex';
