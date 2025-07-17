@@ -1,0 +1,388 @@
+{% extends "base.html" %}
+
+{% block title %}{{ feedback.job_title }} - Feedback détaillé - AIrh{% endblock %}
+
+{% block content %}
+<style>
+    .feedback-detail-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .breadcrumb-nav {
+        margin-bottom: 2rem;
+    }
+
+    .breadcrumb-link {
+        color: var(--primary-color);
+        text-decoration: none;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .breadcrumb-link:hover {
+        text-decoration: underline;
+    }
+
+    .feedback-header {
+        background: white;
+        border-radius: 0.75rem;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        border-left: 4px solid var(--primary-color);
+    }
+
+    .feedback-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--text-color);
+        margin-bottom: 0.5rem;
+    }
+
+    .feedback-subtitle {
+        color: #6B7280;
+        font-size: 1.1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .feedback-meta {
+        display: flex;
+        gap: 2rem;
+        margin-top: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #6B7280;
+        font-size: 0.875rem;
+    }
+
+    .meta-item i {
+        color: var(--primary-color);
+        width: 16px;
+    }
+
+    .score-overview {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 0.75rem;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+
+    .score-value {
+        font-size: 4rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .score-label {
+        font-size: 1.25rem;
+        opacity: 0.9;
+    }
+
+    .feedback-content {
+        background: white;
+        border-radius: 0.75rem;
+        padding: 2rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+    }
+
+    .section-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--text-color);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .section-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 0.5rem;
+        background: var(--primary-color);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.1rem;
+    }
+
+    .content-text {
+        line-height: 1.8;
+        color: var(--text-color);
+        font-size: 1rem;
+    }
+
+    .content-text h1, .content-text h2, .content-text h3, .content-text h4 {
+        color: var(--primary-color);
+        margin-top: 2rem;
+        margin-bottom: 1rem;
+        font-weight: 600;
+    }
+
+    .content-text h1 {
+        font-size: 1.5rem;
+        border-bottom: 2px solid var(--primary-color);
+        padding-bottom: 0.5rem;
+    }
+
+    .content-text h2 {
+        font-size: 1.25rem;
+    }
+
+    .content-text h3 {
+        font-size: 1.1rem;
+    }
+
+    .content-text ul, .content-text ol {
+        margin: 1rem 0;
+        padding-left: 2rem;
+    }
+
+    .content-text li {
+        margin-bottom: 0.5rem;
+    }
+
+    .content-text strong {
+        color: var(--primary-color);
+        font-weight: 600;
+    }
+
+    .content-text p {
+        margin-bottom: 1rem;
+    }
+
+    .summary-box {
+        background: #F0F9FF;
+        border: 1px solid #BAE6FD;
+        border-radius: 0.5rem;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .summary-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #0369A1;
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .summary-text {
+        color: #0F172A;
+        line-height: 1.6;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.5rem;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.2s;
+        border: none;
+        cursor: pointer;
+        font-size: 0.875rem;
+    }
+
+    .btn-primary {
+        background: var(--primary-color);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: var(--secondary-color);
+        color: white;
+        transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+        background: white;
+        color: var(--text-color);
+        border: 1px solid #E5E7EB;
+    }
+
+    .btn-secondary:hover {
+        background: #F3F4F6;
+        color: var(--text-color);
+    }
+
+    .btn-success {
+        background: #10B981;
+        color: white;
+    }
+
+    .btn-success:hover {
+        background: #059669;
+        color: white;
+    }
+
+    @media (max-width: 768px) {
+        .feedback-detail-container {
+            padding: 1rem;
+        }
+
+        .feedback-meta {
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .score-value {
+            font-size: 3rem;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+        }
+    }
+</style>
+
+<div class="feedback-detail-container">
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb-nav">
+        <a href="{{ url_for('feedbacks') }}" class="breadcrumb-link">
+            <i class="fas fa-arrow-left"></i> 
+            Retour aux feedbacks
+        </a>
+    </nav>
+
+    <!-- Header avec infos générales -->
+    <div class="feedback-header">
+        <h1 class="feedback-title">{{ feedback.job_title }}</h1>
+        <p class="feedback-subtitle">Analyse détaillée de votre entretien</p>
+        
+        <div class="feedback-meta">
+            <div class="meta-item">
+                <i class="fas fa-calendar-alt"></i>
+                <span>{{ feedback.formatted_timestamp }}</span>
+            </div>
+            <div class="meta-item">
+                <i class="fas fa-chart-line"></i>
+                <span>Entretien d'embauche</span>
+            </div>
+            <div class="meta-item">
+                <i class="fas fa-check-circle"></i>
+                <span>Analyse complétée</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Score d'adéquation (si disponible) -->
+    {% if feedback.feedback_data and feedback.feedback_data.get('score_adequation') %}
+    <div class="score-overview">
+        <div class="score-value">{{ feedback.feedback_data.score_adequation }}/100</div>
+        <div class="score-label">Score d'adéquation au poste</div>
+    </div>
+    {% endif %}
+
+    <!-- Résumé rapide (si disponible) -->
+    {% if feedback.feedback_data and feedback.feedback_data.get('resume') %}
+    <div class="summary-box">
+        <div class="summary-title">
+            <i class="fas fa-lightbulb"></i>
+            Résumé de l'analyse
+        </div>
+        <div class="summary-text">{{ feedback.feedback_data.resume }}</div>
+    </div>
+    {% endif %}
+
+    <!-- Contenu principal de l'analyse -->
+    <div class="feedback-content">
+        <h2 class="section-title">
+            <div class="section-icon">
+                <i class="fas fa-file-alt"></i>
+            </div>
+            Rapport d'analyse détaillé
+        </h2>
+        
+        <div class="content-text" id="analysisContent">
+            {% if feedback.get('analysis_report') %}
+                {{ feedback.analysis_report }}
+            {% else %}
+                <p>Aucune analyse détaillée disponible pour ce feedback.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="action-buttons">
+        <a href="{{ url_for('feedbacks') }}" class="btn btn-secondary">
+            <i class="fas fa-list"></i>
+            Tous les feedbacks
+        </a>
+        <a href="{{ url_for('jobs') }}" class="btn btn-primary">
+            <i class="fas fa-briefcase"></i>
+            Nouvel entretien
+        </a>
+        <button onclick="window.print()" class="btn btn-success">
+            <i class="fas fa-print"></i>
+            Imprimer
+        </button>
+    </div>
+</div>
+
+<script>
+// Améliorer l'affichage du contenu markdown
+document.addEventListener('DOMContentLoaded', function() {
+    const contentElement = document.getElementById('analysisContent');
+    if (contentElement) {
+        let content = contentElement.innerHTML;
+        
+        // Traitement du markdown basique
+        content = content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        content = content.replace(/^### (.*$)/gm, '<h3>$1</h3>');
+        content = content.replace(/^## (.*$)/gm, '<h2>$1</h2>');
+        content = content.replace(/^# (.*$)/gm, '<h1>$1</h1>');
+        
+        // Traitement des listes
+        content = content.replace(/^- (.*$)/gm, '<li>$1</li>');
+        content = content.replace(/^(\d+)\. (.*$)/gm, '<li>$2</li>');
+        
+        // Regrouper les éléments de liste consécutifs
+        content = content.replace(/(<li>.*?<\/li>(\s*<li>.*?<\/li>)*)/gs, function(match) {
+            return '<ul>' + match + '</ul>';
+        });
+        
+        // Traitement des paragraphes
+        content = content.replace(/\n\n/g, '</p><p>');
+        content = content.replace(/\n/g, '<br>');
+        
+        // Wrap dans des paragraphes si pas déjà fait
+        if (!content.trim().startsWith('<')) {
+            content = '<p>' + content + '</p>';
+        }
+        
+        // Nettoyer les paragraphes vides
+        content = content.replace(/<p><\/p>/g, '');
+        content = content.replace(/<p>\s*<\/p>/g, '');
+        content = content.replace(/<p>\s*<br>\s*<\/p>/g, '');
+        
+        contentElement.innerHTML = content;
+    }
+});
+</script>
+{% endblock %}
