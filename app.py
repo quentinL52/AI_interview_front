@@ -233,11 +233,11 @@ def delete_resume():
 def jobs():
     try:
         jobs_data = fetch_job_offers()
-        return render_template('jobs.html', jobs=jobs_data or [])
+        return render_template('jobs.html', jobs=jobs_data or [], config=Config)
     except Exception as e:
         logging.error(f"Erreur lors de la récupération des offres d'emploi : {str(e)}")
         flash("Une erreur est survenue lors de la récupération des offres d'emploi.", "danger")
-        return render_template('jobs.html', jobs=[])
+        return render_template('jobs.html', jobs=[], config=Config)
 
 @app.route('/interview-ai', methods=['GET', 'POST'])
 @login_required
