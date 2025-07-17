@@ -383,22 +383,51 @@ def feedbacks():
 def get_feedback_details(feedback_id):
     try:
         mongo_manager = MongoManager()
-        feedback = mongo_manager.get_feedback_by_id(feedback_id)
-        
-        # CORRECTION: Utiliser "user_id" au lieu de "user_google_id" 
-        if not feedback or feedback.get('user_id') != g.user.google_id:
+        db = mongo_manager.db
+        feedback = None
+        all_collections = db.list_collection_names()
+        for collection_name in all_collections:
+            try:
+                collection = db[collection_name]
+                found_feedback = collection.find_one({"_id": ObjectId(feedback_id)})
+                if found_feedback:
+                    # Vérifier que ce feedback appartient à l'utilisateur connecté
+                    user_identifiers = [g.user.google_id, str(g.user.id), g.user.email]
+                    possible_user_fields = ['user_id', 'user_google_id', 'google_id', 'user', 'email']
+                    user_owns_feedback = False
+                    for field in possible_user_fields:
+                        if field in found_feedback:
+                            if str(found_feedback[field]) in [str(uid) for uid in user_identifiers]:
+                                user_owns_feedback = True
+                                break
+                    if user_owns_feedback:
+                        feedback = found_feedback
+                        feedback['_id'] = str(feedback['_id'])
+                        break
+            except Exception as e:
+                continue
+        if not feedback:
             flash("Feedback introuvable.", "danger")
             return redirect(url_for('feedbacks'))
-        
-        # Le reste du code reste identique...
         if 'updated_at' in feedback:
-            if isinstance(feedback['updated_at'], str):
-                feedback['formatted_timestamp'] = datetime.fromisoformat(feedback['updated_at'].replace('Z', '+00:00')).strftime('%d/%m/%Y à %H:%M')
+            # Gérer le format MongoDB avec $date
+            if isinstance(feedback['updated_at'], dict) and '$date' in feedback['updated_at']:
+                if '$numberLong' in feedback['updated_at']['$date']:
+                    # Timestamp en millisecondes
+                    timestamp_ms = int(feedback['updated_at']['$date']['$numberLong'])
+                    timestamp_s = timestamp_ms / 1000
+                    feedback['formatted_timestamp'] = datetime.fromtimestamp(timestamp_s).strftime('%d/%m/%Y à %H:%M')
+                else:
+                    feedback['formatted_timestamp'] = feedback['updated_at']['$date']
+            elif isinstance(feedback['updated_at'], str):
+                try:
+                    feedback['formatted_timestamp'] = datetime.fromisoformat(feedback['updated_at'].replace('Z', '+00:00')).strftime('%d/%m/%Y à %H:%M')
+                except ValueError:
+                    feedback['formatted_timestamp'] = feedback['updated_at']
             else:
                 feedback['formatted_timestamp'] = feedback['updated_at'].strftime('%d/%m/%Y à %H:%M')
         else:
             feedback['formatted_timestamp'] = 'Date inconnue'
-        
         job_offer_id = feedback.get('job_offer_id')
         if job_offer_id:
             jobs_data = fetch_job_offers()
@@ -409,12 +438,16 @@ def get_feedback_details(feedback_id):
                 feedback['job_title'] = f"Poste #{job_offer_id[:8]}..."
         else:
             feedback['job_title'] = 'Poste inconnu'
-        
+        if 'feedback_data' in feedback and isinstance(feedback['feedback_data'], dict):
+            if 'analysis_report' in feedback['feedback_data']:
+                # Déplacer analysis_report au niveau principal pour le template
+                feedback['analysis_report'] = feedback['feedback_data']['analysis_report']
         mongo_manager.close_connection()
         return render_template('feedback_details.html', feedback=feedback)
-        
     except Exception as e:
         logging.error(f"Erreur lors de la récupération du feedback: {e}")
+        import traceback
+        traceback.print_exc()
         flash("Une erreur est survenue.", "danger")
         return redirect(url_for('feedbacks'))
 
