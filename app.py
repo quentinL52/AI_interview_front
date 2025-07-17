@@ -346,13 +346,9 @@ def interview_ai():
 def feedbacks():
     try:
         mongo_manager = MongoManager()
-        
         # Récupérer tous les feedbacks pour l'utilisateur
         all_feedbacks = mongo_manager.get_all_feedbacks(g.user.google_id)
-        
-        # Enrichir les feedbacks avec les informations des offres d'emploi
-        jobs_data = fetch_job_offers()  # Récupérer toutes les offres
-        
+        jobs_data = fetch_job_offers()
         for feedback in all_feedbacks:
             # Formater la date
             if 'updated_at' in feedback:
@@ -365,27 +361,18 @@ def feedbacks():
                     feedback['formatted_timestamp'] = feedback['updated_at'].strftime('%d/%m/%Y %H:%M')
             else:
                 feedback['formatted_timestamp'] = 'Date inconnue'
-            
-            # Trouver le titre du poste correspondant
             job_offer_id = feedback.get('job_offer_id')
             if job_offer_id and jobs_data:
                 matching_job = next((job for job in jobs_data if job.get('id') == job_offer_id), None)
                 if matching_job:
                     feedback['job_title'] = matching_job.get('poste', 'Poste inconnu')
-                    feedback['company_name'] = matching_job.get('entreprise', 'Entreprise inconnue')
                 else:
                     feedback['job_title'] = f"Poste #{job_offer_id[:8]}..."
-                    feedback['company_name'] = 'Entreprise inconnue'
             else:
                 feedback['job_title'] = 'Poste inconnu'
-                feedback['company_name'] = 'Entreprise inconnue'
-        
-        # Trier par date décroissante
         all_feedbacks.sort(key=lambda x: x.get('updated_at', ''), reverse=True)
-        
         mongo_manager.close_connection()
         return render_template('feedbacks.html', feedbacks=all_feedbacks)
-        
     except Exception as e:
         logging.error(f"Erreur lors de la récupération des feedbacks: {e}")
         flash("Une erreur est survenue lors de la récupération de vos feedbacks.", "danger")
