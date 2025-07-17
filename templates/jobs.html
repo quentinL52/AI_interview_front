@@ -164,6 +164,98 @@
         margin-bottom: 1rem;
     }
 
+    /* Stats Styles */
+    .stats-container {
+        margin: 1.5rem 0;
+        background: white;
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        border: 1px solid #f3f4f6;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 1rem;
+    }
+
+    .stat-card {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 1rem;
+        background: #f8fafc;
+        border-radius: 0.5rem;
+        transition: all 0.2s;
+        border: 1px solid #e2e8f0;
+    }
+
+    .stat-card:hover {
+        background: #f1f5f9;
+        transform: translateY(-1px);
+    }
+
+    .stat-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        flex-shrink: 0;
+    }
+
+    .stat-card:nth-child(1) .stat-icon {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+
+    .stat-card:nth-child(2) .stat-icon {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+    }
+
+    .stat-card:nth-child(3) .stat-icon {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        color: white;
+    }
+
+    .stat-card:nth-child(4) .stat-icon {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+    }
+
+    .stat-card:nth-child(5) .stat-icon {
+        background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+        color: white;
+    }
+
+    .stat-card:nth-child(6) .stat-icon {
+        background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+        color: white;
+    }
+
+    .stat-content {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .stat-number {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-color);
+        line-height: 1;
+    }
+
+    .stat-label {
+        font-size: 0.8rem;
+        color: #6b7280;
+        font-weight: 500;
+        margin-top: 0.25rem;
+    }
+
     .search-input-wrapper {
         position: relative;
         max-width: 600px;
@@ -322,7 +414,7 @@
         pointer-events: none;
     }
 
-    @media (max-width: 768px) {
+        @media (max-width: 768px) {
         .jobs-container {
             grid-template-columns: 1fr;
             padding: 1rem;
@@ -345,6 +437,33 @@
             height: 35px;
             font-size: 0.8rem;
         }
+
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+        }
+
+        .stat-card {
+            padding: 0.75rem;
+        }
+
+        .stat-icon {
+            width: 35px;
+            height: 35px;
+            font-size: 1rem;
+        }
+
+        .stat-number {
+            font-size: 1.25rem;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+        }
+
+        .search-container {
+            margin-top: 1rem;
+        }
     }
 </style>
 
@@ -354,6 +473,66 @@
         <span class="jobs-count" id="totalCount">{{ jobs|length }} offre{% if jobs|length > 1 %}s{% endif %}</span>
     </h1>
     <p class="page-subtitle">Découvrez les opportunités disponibles et lancez votre entretien de simulation</p>
+    
+    <!-- Statistiques des offres -->
+    <div class="stats-container" id="statsContainer">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-graduation-cap"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-number" id="statAlternance">0</div>
+                    <div class="stat-label">Alternance</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-briefcase"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-number" id="statCDI">0</div>
+                    <div class="stat-label">CDI</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-number" id="statCDD">0</div>
+                    <div class="stat-label">CDD</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-user-graduate"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-number" id="statStage">0</div>
+                    <div class="stat-label">Stage</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-user-check"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-number" id="statSansDiplome">0</div>
+                    <div class="stat-label">Sans diplôme</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-rocket"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-number" id="statJunior">0</div>
+                    <div class="stat-label">Junior</div>
+                </div>
+            </div>
+        </div>
+    </div>
     
     <!-- Barre de recherche -->
     <div class="search-container">
@@ -440,6 +619,7 @@ class JobsPagination {
         
         this.init();
         this.initSearch();
+        this.calculateStats();
     }
 
     init() {
@@ -558,6 +738,9 @@ class JobsPagination {
         // Mettre à jour le compteur principal
         document.getElementById('totalCount').textContent = `${this.filteredJobs.length} offre${this.filteredJobs.length > 1 ? 's' : ''}`;
 
+        // Mettre à jour les statistiques pour les résultats filtrés
+        this.updateSearchStats();
+
         this.showFilteredPage(1);
         this.renderPagination();
     }
@@ -570,6 +753,9 @@ class JobsPagination {
         
         this.searchResultsInfo.innerHTML = '';
         document.getElementById('totalCount').textContent = `${this.totalJobs} offre${this.totalJobs > 1 ? 's' : ''}`;
+        
+        // Remettre les statistiques d'origine
+        this.calculateStats();
         
         this.showPage(1);
         this.renderPagination();
@@ -705,6 +891,95 @@ class JobsPagination {
         });
 
         return button;
+    }
+
+    calculateStats() {
+        const stats = {
+            alternance: 0,
+            cdi: 0,
+            cdd: 0,
+            stage: 0,
+            sansDiplome: 0,
+            junior: 0
+        };
+
+        this.allJobs.forEach(job => {
+            const jobText = this.getJobSearchableText(job).toLowerCase();
+            
+            // Analyser le type de contrat
+            if (jobText.includes('alternance')) stats.alternance++;
+            if (jobText.includes('cdi')) stats.cdi++;
+            if (jobText.includes('cdd')) stats.cdd++;
+            if (jobText.includes('stage')) stats.stage++;
+            
+            // Analyser les exigences
+            if (jobText.includes('sans diplôme') || 
+                jobText.includes('sans diplome') || 
+                jobText.includes('aucun diplôme') ||
+                jobText.includes('pas de diplôme')) {
+                stats.sansDiplome++;
+            }
+            
+            // Analyser le niveau
+            if (jobText.includes('junior') || 
+                jobText.includes('débutant') || 
+                jobText.includes('premier emploi') ||
+                jobText.includes('entry level')) {
+                stats.junior++;
+            }
+        });
+
+        this.updateStatsDisplay(stats);
+    }
+
+    updateStatsDisplay(stats) {
+        document.getElementById('statAlternance').textContent = stats.alternance;
+        document.getElementById('statCDI').textContent = stats.cdi;
+        document.getElementById('statCDD').textContent = stats.cdd;
+        document.getElementById('statStage').textContent = stats.stage;
+        document.getElementById('statSansDiplome').textContent = stats.sansDiplome;
+        document.getElementById('statJunior').textContent = stats.junior;
+    }
+
+    updateSearchStats() {
+        if (this.filteredJobs.length === 0 || this.searchInput.value.trim() === '') {
+            this.calculateStats();
+            return;
+        }
+
+        const stats = {
+            alternance: 0,
+            cdi: 0,
+            cdd: 0,
+            stage: 0,
+            sansDiplome: 0,
+            junior: 0
+        };
+
+        this.filteredJobs.forEach(jobObj => {
+            const jobText = this.getJobSearchableText(jobObj.element).toLowerCase();
+            
+            if (jobText.includes('alternance')) stats.alternance++;
+            if (jobText.includes('cdi')) stats.cdi++;
+            if (jobText.includes('cdd')) stats.cdd++;
+            if (jobText.includes('stage')) stats.stage++;
+            
+            if (jobText.includes('sans diplôme') || 
+                jobText.includes('sans diplome') || 
+                jobText.includes('aucun diplôme') ||
+                jobText.includes('pas de diplôme')) {
+                stats.sansDiplome++;
+            }
+            
+            if (jobText.includes('junior') || 
+                jobText.includes('débutant') || 
+                jobText.includes('premier emploi') ||
+                jobText.includes('entry level')) {
+                stats.junior++;
+            }
+        });
+
+        this.updateStatsDisplay(stats);
     }
 
     createNavButton(symbol, targetPage, isDisabled) {
