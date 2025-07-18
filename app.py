@@ -10,6 +10,7 @@ from dotenv import load_dotenv
 import secrets
 from werkzeug.utils import secure_filename
 from authlib.integrations.flask_client import OAuth
+from flask_cors import CORS
 
 import json
 from functools import wraps
@@ -45,9 +46,12 @@ app = Flask(__name__)
 logging.basicConfig(level=logging.INFO)
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", secrets.token_hex(16))
 app.config.update(
-    SESSION_COOKIE_SAMESITE='Strict',
-    SESSION_COOKIE_SECURE=True
+    SESSION_COOKIE_SAMESITE='None',
+    SESSION_COOKIE_SECURE=True,
+    SESSION_COOKIE_HTTPONLY=True
 )
+
+CORS(app, supports_credentials=True, origins=config.ORIGIN)
 
 UPLOAD_FOLDER = 'uploads'
 ALLOWED_EXTENSIONS = {'pdf'}
