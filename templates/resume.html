@@ -1,10 +1,3 @@
-Vous avez absolument raison \! Mon code précédent était basé sur une structure de données incorrecte pour la section "projets". Merci de m'avoir fourni la structure JSON exacte. L'erreur vient du fait que mon code essayait de parcourir `cv_data.projets` comme une simple liste, alors qu'il s'agit d'un objet contenant deux listes distinctes : `professional` et `personal`.
-
-J'ai corrigé le template pour qu'il reflète précisément votre structure de données. Il va maintenant parcourir les projets professionnels et afficher leurs détails correctement.
-
-Voici le code complet et corrigé pour le fichier `resume.html`.
-
-```html
 {% extends "base.html" %}
 
 {% block title %}Mon CV - AIrh{% endblock %}
@@ -304,4 +297,3 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 {% endblock %}
-```
