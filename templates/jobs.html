@@ -543,7 +543,6 @@
     </h1>
     <p class="page-subtitle">Découvrez les opportunités disponibles et lancez votre entretien de simulation</p>
     
-    <!-- Statistiques des offres -->
     <div class="stats-container" id="statsContainer">
         <div class="stats-grid">
             <div class="stat-card" data-filter="alternance" title="Cliquez pour filtrer les offres en alternance">
@@ -603,7 +602,6 @@
         </div>
     </div>
     
-    <!-- Barre de recherche -->
     <div class="search-container">
         <div class="search-input-wrapper">
             <i class="fas fa-search search-icon"></i>
@@ -622,7 +620,6 @@
     </div>
 </div>
 
-<!-- Bannière de filtre actif -->
 <div class="filter-info-banner" id="filterBanner">
     <div class="filter-info-text">
         <i class="fas fa-filter"></i>
@@ -680,8 +677,7 @@
 
 <div class="pagination-container">
     <nav class="pagination" id="pagination">
-        <!-- La pagination sera générée par JavaScript -->
-    </nav>
+        </nav>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
@@ -1598,16 +1594,6 @@ class JobsPagination {
         // Mise à jour instantanée des statistiques
         this.updateStatsDisplay(stats);
     }
-}
-
-// Initialiser la pagination quand la page est chargée
-document.addEventListener('DOMContentLoaded', function() {
-    // Initialiser la pagination avec analyse Groq discrète et filtres cliquables
-    new JobsPagination(8);
-});
-</script>
-{% endblock %}Banner(filterType);
-    }
 
     applyStatFilter(filterType) {
         this.filteredJobs = [];
@@ -1922,3 +1908,9 @@ document.addEventListener('DOMContentLoaded', function() {
         this.showFilteredPage(1);
         this.renderPagination();
     }
+}
+document.addEventListener('DOMContentLoaded', function() {
+    new JobsPagination(8);
+});
+</script>
+{% endblock %}
