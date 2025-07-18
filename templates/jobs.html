@@ -158,126 +158,9 @@
         margin-left: 0.5rem;
     }
 
-    /* Search Styles */
     .search-container {
         margin-top: 1.5rem;
         margin-bottom: 1rem;
-    }
-
-    /* Stats Styles */
-    .stats-container {
-        margin: 1.5rem 0;
-        background: white;
-        border-radius: 0.75rem;
-        padding: 1.5rem;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        border: 1px solid #f3f4f6;
-    }
-
-    .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-        gap: 1rem;
-    }
-
-    .stat-card {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        padding: 1rem;
-        background: #f8fafc;
-        border-radius: 0.5rem;
-        transition: all 0.2s;
-        border: 1px solid #e2e8f0;
-        cursor: pointer;
-        position: relative;
-    }
-
-    .stat-card:hover {
-        background: #f1f5f9;
-        transform: translateY(-1px);
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
-    }
-
-    .stat-card.active {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        border-color: #667eea;
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-    }
-
-    .stat-card.active .stat-number {
-        color: white;
-    }
-
-    .stat-card.active .stat-label {
-        color: rgba(255, 255, 255, 0.9);
-    }
-
-    .stat-icon {
-        width: 40px;
-        height: 40px;
-        border-radius: 0.5rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.1rem;
-        flex-shrink: 0;
-    }
-
-    .stat-card:nth-child(1) .stat-icon {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-    }
-
-    .stat-card:nth-child(2) .stat-icon {
-        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-        color: white;
-    }
-
-    .stat-card:nth-child(3) .stat-icon {
-        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-        color: white;
-    }
-
-    .stat-card:nth-child(4) .stat-icon {
-        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-        color: white;
-    }
-
-    .stat-card:nth-child(5) .stat-icon {
-        background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
-        color: white;
-    }
-
-    .stat-card:nth-child(6) .stat-icon {
-        background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
-        color: white;
-    }
-
-    .stat-card.active .stat-icon {
-        background: rgba(255, 255, 255, 0.2) !important;
-        color: white !important;
-    }
-
-    .stat-content {
-        flex: 1;
-        min-width: 0;
-    }
-
-    .stat-number {
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: var(--text-color);
-        line-height: 1;
-    }
-
-    .stat-label {
-        font-size: 0.8rem;
-        color: #6b7280;
-        font-weight: 500;
-        margin-top: 0.25rem;
     }
 
     .search-input-wrapper {
@@ -340,60 +223,19 @@
         margin-top: 0.75rem;
         font-size: 0.875rem;
         color: #6b7280;
+        height: 20px; /* Reserve space to avoid layout shifts */
     }
-
-    .search-highlight {
-        background: rgba(99, 102, 241, 0.1);
-        border-radius: 0.25rem;
-        padding: 0.125rem 0.25rem;
-        font-weight: 600;
-        color: var(--primary-color);
+    
+    .search-results-info .spinner-border {
+        width: 1rem;
+        height: 1rem;
+        border-width: .2em;
     }
 
     .job-card.hidden {
         display: none !important;
     }
 
-    /* Filter info banner */
-    .filter-info-banner {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        padding: 1rem 1.5rem;
-        margin: 1rem 1.5rem 0 1.5rem;
-        border-radius: 0.75rem;
-        display: none;
-        align-items: center;
-        justify-content: space-between;
-        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
-    }
-
-    .filter-info-banner.show {
-        display: flex;
-    }
-
-    .filter-info-text {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        font-weight: 500;
-    }
-
-    .clear-filter-btn {
-        background: rgba(255, 255, 255, 0.2);
-        border: none;
-        color: white;
-        padding: 0.5rem 1rem;
-        border-radius: 0.375rem;
-        cursor: pointer;
-        font-weight: 500;
-        transition: all 0.2s;
-    }
-
-    .clear-filter-btn:hover {
-        background: rgba(255, 255, 255, 0.3);
-    }
-
-    /* Pagination Styles */
     .pagination-container {
         display: flex;
         justify-content: center;
@@ -439,18 +281,6 @@
         color: white;
     }
 
-    .pagination-item.disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-        pointer-events: none;
-    }
-
-    .pagination-dots {
-        padding: 0 0.5rem;
-        color: #9ca3af;
-        font-weight: 500;
-    }
-
     .pagination-nav {
         display: flex;
         align-items: center;
@@ -483,55 +313,13 @@
             padding: 1rem;
         }
         
-        .job-info {
-            grid-template-columns: 1fr;
-        }
-        
         .job-actions {
             flex-direction: column;
-        }
-
-        .pagination {
-            gap: 0.25rem;
         }
 
         .pagination-item, .pagination-nav {
             width: 35px;
             height: 35px;
-            font-size: 0.8rem;
-        }
-
-        .stats-grid {
-            grid-template-columns: repeat(2, 1fr);
-            gap: 0.75rem;
-        }
-
-        .stat-card {
-            padding: 0.75rem;
-        }
-
-        .stat-icon {
-            width: 35px;
-            height: 35px;
-            font-size: 1rem;
-        }
-
-        .stat-number {
-            font-size: 1.25rem;
-        }
-
-        .stat-label {
-            font-size: 0.75rem;
-        }
-
-        .search-container {
-            margin-top: 1rem;
-        }
-
-        .filter-info-banner {
-            flex-direction: column;
-            gap: 1rem;
-            text-align: center;
         }
     }
 </style>
@@ -539,68 +327,9 @@
 <div class="page-header">
     <h1 class="page-title">
         Offres d'emploi
-        <span class="jobs-count" id="totalCount">{{ jobs|length }} offre{% if jobs|length > 1 %}s{% endif %}</span>
+        <span class="jobs-count" id="totalCount">{{ jobs|length }}</span>
     </h1>
     <p class="page-subtitle">Découvrez les opportunités disponibles et lancez votre entretien de simulation</p>
-    
-    <div class="stats-container" id="statsContainer">
-        <div class="stats-grid">
-            <div class="stat-card" data-filter="alternance" title="Cliquez pour filtrer les offres en alternance">
-                <div class="stat-icon">
-                    <i class="fas fa-graduation-cap"></i>
-                </div>
-                <div class="stat-content">
-                    <div class="stat-number" id="statAlternance">0</div>
-                    <div class="stat-label">Alternance</div>
-                </div>
-            </div>
-            <div class="stat-card" data-filter="cdi" title="Cliquez pour filtrer les offres en CDI">
-                <div class="stat-icon">
-                    <i class="fas fa-briefcase"></i>
-                </div>
-                <div class="stat-content">
-                    <div class="stat-number" id="statCDI">0</div>
-                    <div class="stat-label">CDI</div>
-                </div>
-            </div>
-            <div class="stat-card" data-filter="cdd" title="Cliquez pour filtrer les offres en CDD">
-                <div class="stat-icon">
-                    <i class="fas fa-clock"></i>
-                </div>
-                <div class="stat-content">
-                    <div class="stat-number" id="statCDD">0</div>
-                    <div class="stat-label">CDD</div>
-                </div>
-            </div>
-            <div class="stat-card" data-filter="stage" title="Cliquez pour filtrer les offres de stage">
-                <div class="stat-icon">
-                    <i class="fas fa-user-graduate"></i>
-                </div>
-                <div class="stat-content">
-                    <div class="stat-number" id="statStage">0</div>
-                    <div class="stat-label">Stage</div>
-                </div>
-            </div>
-            <div class="stat-card" data-filter="sans-diplome" title="Cliquez pour filtrer les offres sans diplôme requis">
-                <div class="stat-icon">
-                    <i class="fas fa-user-check"></i>
-                </div>
-                <div class="stat-content">
-                    <div class="stat-number" id="statSansDiplome">0</div>
-                    <div class="stat-label">Sans diplôme</div>
-                </div>
-            </div>
-            <div class="stat-card" data-filter="junior" title="Cliquez pour filtrer les offres junior">
-                <div class="stat-icon">
-                    <i class="fas fa-rocket"></i>
-                </div>
-                <div class="stat-content">
-                    <div class="stat-number" id="statJunior">0</div>
-                    <div class="stat-label">Junior</div>
-                </div>
-            </div>
-        </div>
-    </div>
     
     <div class="search-container">
         <div class="search-input-wrapper">
@@ -609,7 +338,7 @@
                 type="text" 
                 id="searchInput" 
                 class="search-input" 
-                placeholder="Recherchez par mots-clés : poste, compétences, type de contrat..."
+                placeholder="Rechercher un poste, une technologie, un type de contrat..."
                 autocomplete="off"
             >
             <button id="clearSearch" class="clear-search" style="display: none;">
@@ -620,38 +349,18 @@
     </div>
 </div>
 
-<div class="filter-info-banner" id="filterBanner">
-    <div class="filter-info-text">
-        <i class="fas fa-filter"></i>
-        <span id="filterText">Filtre actif</span>
-    </div>
-    <button class="clear-filter-btn" id="clearFilterBtn">
-        <i class="fas fa-times"></i>
-        Effacer le filtre
-    </button>
-</div>
-
 <div class="jobs-container" id="jobsContainer">
     {% for job in jobs %}
-    <div class="job-card" data-job-index="{{ loop.index0 }}">
+    <div class="job-card" data-job-id="{{ job.id }}">
         <div class="job-header">
             <h2 class="job-title">{{ job.poste }}</h2>
             <div class="job-company">{{ job.entreprise }}</div>
         </div>
         
         <div class="job-info">
-            <div class="job-info-item">
-                <i class="fas fa-map-marker-alt"></i>
-                <span>{{ job.ville }}</span>
-            </div>
-            <div class="job-info-item">
-                <i class="fas fa-file-contract"></i>
-                <span>{{ job.contrat }}</span>
-            </div>
-            <div class="job-info-item">
-                <i class="fas fa-calendar-alt"></i>
-                <span>{{ job.publication }}</span>
-            </div>
+            <div class="job-info-item"><i class="fas fa-map-marker-alt"></i><span>{{ job.ville }}</span></div>
+            <div class="job-info-item"><i class="fas fa-file-contract"></i><span>{{ job.contrat }}</span></div>
+            <div class="job-info-item"><i class="fas fa-calendar-alt"></i><span>{{ job.publication }}</span></div>
         </div>
 
         {% if job.get('description_nettoyee') %}
@@ -662,1255 +371,221 @@
         {% endif %}
 
         <div class="job-actions">
-            <a href="{{ job.lien }}" target="_blank" class="job-link">
-                <i class="fas fa-external-link-alt"></i>
-                Voir l'offre
-            </a>
-            <a href="{{ url_for('interview_ai', job_id=job.id) }}" class="interview-link">
-                <i class="fas fa-microphone"></i>
-                Entretien
-            </a>
+            <a href="{{ job.lien }}" target="_blank" class="job-link"><i class="fas fa-external-link-alt"></i> Voir l'offre</a>
+            <a href="{{ url_for('interview_ai', job_id=job.id) }}" class="interview-link"><i class="fas fa-microphone"></i> Entretien</a>
         </div>
     </div>
     {% endfor %}
 </div>
 
-<div class="pagination-container">
-    <nav class="pagination" id="pagination">
-        </nav>
+<div class="pagination-container" id="paginationContainer">
+    <nav class="pagination" id="pagination"></nav>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
-
 <script>
-// Récupérer la clé API Groq depuis le serveur
-window.GROQ_API_KEY = '{{ config.GROQ_API_KEY if config and config.GROQ_API_KEY else "" }}';
-
-class GroqContextualAnalyzer {
-    constructor(config = {}) {
-        this.apiKey = config.apiKey || 'demo-key';
-        this.model = config.model || 'llama-3.1-8b-instant';
-        this.baseURL = 'https://api.groq.com/openai/v1';
-        this.cache = new Map();
-        this.batchSize = config.batchSize || 6;
-        this.maxCacheSize = 1500;
-        
-        this.stats = {
-            totalRequests: 0,
-            cacheHits: 0,
-            totalLatency: 0,
-            errors: 0
-        };
-    }
-
-    // Analyse contextuelle complète d'une offre
-    async analyzeJobContext(jobTitle, jobDescription, company) {
-        const startTime = Date.now();
-        const cacheKey = this.createContextCacheKey(jobTitle, jobDescription);
-        
-        if (this.cache.has(cacheKey)) {
-            this.stats.cacheHits++;
-            return this.cache.get(cacheKey);
+document.addEventListener('DOMContentLoaded', function() {
+    
+    class GroqIntelligentSearch {
+        constructor(apiKey) {
+            this.apiKey = apiKey;
+            this.model = 'llama-3.1-8b-instant';
+            this.baseURL = 'https://api.groq.com/openai/v1';
         }
 
-        try {
-            this.stats.totalRequests++;
-            const result = await this.callGroqContextualAPI(jobTitle, jobDescription, company);
-            
-            const latency = Date.now() - startTime;
-            this.stats.totalLatency += latency;
-            
-            this.setCacheValue(cacheKey, result);
-            return result;
-            
-        } catch (error) {
-            this.stats.errors++;
-            console.warn('Groq contextual analysis error:', error);
-            return this.fallbackContextualAnalysis(jobTitle, jobDescription);
-        }
-    }
-
-    async callGroqContextualAPI(jobTitle, jobDescription, company) {
-        const prompt = this.createContextualPrompt(jobTitle, jobDescription, company);
-        
-        const response = await fetch(`${this.baseURL}/chat/completions`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${this.apiKey}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                model: this.model,
-                messages: [{ 
-                    role: "user", 
-                    content: prompt 
-                }],
-                max_tokens: 30,
-                temperature: 0.1,
-                top_p: 1,
-                stream: false
-            })
-        });
-
-        if (!response.ok) {
-            throw new Error(`Groq API Error: ${response.status}`);
+        createPrompt(query, jobs) {
+            return `
+                Analyse la requête de l'utilisateur et filtre la liste d'offres d'emploi (JSON).
+                La requête est : "${query}".
+                
+                Interprète l'intention de l'utilisateur (technologie, poste, niveau d'expérience, type de contrat, lieu, etc.).
+                
+                Liste des offres :
+                ${JSON.stringify(jobs)}
+                
+                Réponds UNIQUEMENT avec un objet JSON contenant une seule clé "matching_ids", qui est un tableau des 'id' des offres qui correspondent le mieux.
+                Exemple de réponse attendue : {"matching_ids": ["id1", "id3", "id8"]}
+                Ne retourne rien d'autre. Si aucune offre ne correspond, retourne {"matching_ids": []}.
+            `;
         }
 
-        const data = await response.json();
-        const answer = data.choices[0].message.content.trim().toUpperCase();
-        
-        return this.parseContextualResponse(answer);
-    }
-
-    createContextualPrompt(jobTitle, jobDescription, company) {
-        return `ANALYSE CONTEXTUELLE D'OFFRE D'EMPLOI FRANÇAISE
-
-POSTE: "${jobTitle}"
-ENTREPRISE: "${company}"
-DESCRIPTION: "${jobDescription.substring(0, 800)}"
-
-QUESTIONS À ANALYSER:
-
-1. NIVEAU JUNIOR: Ce poste est-il adapté aux débutants/juniors ?
-   - Critères: "junior", "débutant", "première expérience", "sans expérience requise"
-   - Contexte: formation prévue, accompagnement, alternance/stage = souvent junior
-   - Contre-critères: "expérience requise", "minimum X années", "senior", "expert"
-
-2. SANS DIPLÔME: Ce poste accepte-t-il des candidats sans diplôme ?
-   - Critères: "sans diplôme", "formation assurée", "nous formons", alternance/apprentissage
-   - Contexte: reconversion, motivation prioritaire, savoir-être avant diplôme
-   - Nuances: diplôme "souhaité" ≠ "exigé", alternance accepte souvent sans diplôme initial
-   - Contre-critères: "bac+", "master", "licence", "diplôme obligatoire/exigé"
-
-RÉPONSE ATTENDUE (format exact):
-JUNIOR: OUI/NON
-DIPLOME: REQUIS/SANS
-
-Analysez le CONTEXTE GLOBAL, pas seulement les mots-clés isolés.`;
-    }
-
-    parseContextualResponse(answer) {
-        const result = {
-            isJunior: false,
-            noDiplomaRequired: false
-        };
-
-        // Parser la réponse structurée
-        if (answer.includes('JUNIOR: OUI') || answer.includes('JUNIOR:OUI')) {
-            result.isJunior = true;
-        }
-
-        if (answer.includes('DIPLOME: SANS') || answer.includes('DIPLOME:SANS')) {
-            result.noDiplomaRequired = true;
-        }
-
-        return result;
-    }
-
-    // Analyse par lots optimisée pour le contexte
-    async analyzeBatchContextual(jobsData) {
-        const results = new Map();
-        const uncachedJobs = [];
-
-        // Vérifier le cache
-        jobsData.forEach((job, index) => {
-            const cacheKey = this.createContextCacheKey(job.title, job.description);
-            if (this.cache.has(cacheKey)) {
-                results.set(index, this.cache.get(cacheKey));
-            } else {
-                uncachedJobs.push({ ...job, originalIndex: index });
-            }
-        });
-
-        // Traiter par chunks avec délai pour éviter rate limiting
-        const chunks = [];
-        for (let i = 0; i < uncachedJobs.length; i += this.batchSize) {
-            chunks.push(uncachedJobs.slice(i, i + this.batchSize));
-        }
-
-        for (let chunkIndex = 0; chunkIndex < chunks.length; chunkIndex++) {
-            const chunk = chunks[chunkIndex];
-            
-            // Petit délai entre chunks
-            if (chunkIndex > 0) {
-                await this.delay(300);
+        async filterJobs(query, jobs) {
+            if (!this.apiKey || this.apiKey === 'demo-key') {
+                console.warn("Clé API Groq non configurée. La recherche intelligente est désactivée.");
+                return jobs.map(j => j.id); // Retourne tous les IDs si pas d'API key
             }
 
-            const chunkPromises = chunk.map(job => 
-                this.analyzeJobContext(job.title, job.description, job.company)
-                    .then(result => ({ ...job, analysis: result }))
-                    .catch(error => ({ 
-                        ...job, 
-                        analysis: this.fallbackContextualAnalysis(job.title, job.description),
-                        error 
-                    }))
-            );
+            const prompt = this.createPrompt(query, jobs);
 
             try {
-                const chunkResults = await Promise.all(chunkPromises);
-                chunkResults.forEach(({ originalIndex, analysis }) => {
-                    results.set(originalIndex, analysis);
+                const response = await fetch(`${this.baseURL}/chat/completions`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${this.apiKey}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        model: this.model,
+                        messages: [{ role: "user", content: prompt }],
+                        temperature: 0,
+                        response_format: { "type": "json_object" }
+                    })
                 });
+
+                if (!response.ok) {
+                    throw new Error(`Erreur de l'API Groq: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                const result = JSON.parse(data.choices[0].message.content);
+
+                if (result && Array.isArray(result.matching_ids)) {
+                    return result.matching_ids;
+                }
+                return [];
+
             } catch (error) {
-                console.error('Chunk processing error:', error);
+                console.error("Erreur lors du filtrage avec Groq:", error);
+                // En cas d'erreur, ne retourner aucun filtre pour ne pas bloquer l'utilisateur.
+                return jobs.map(j => j.id);
             }
         }
-
-        return Array.from(results.entries())
-            .sort(([a], [b]) => a - b)
-            .map(([, result]) => result);
     }
 
-    // Analyse de secours contextuelle
-    fallbackContextualAnalysis(jobTitle, jobDescription) {
-        const fullText = `${jobTitle} ${jobDescription}`.toLowerCase();
-        
-        // Analyse Junior avec contexte
-        const juniorIndicators = [
-            // Mentions directes
-            { pattern: /junior|débutant|première?\s+expérience/i, weight: 3 },
-            { pattern: /sans\s+expérience|entry\s+level/i, weight: 3 },
-            { pattern: /formation\s+(fournie|assurée|prévue)/i, weight: 2 },
-            
-            // Contextes favorables
-            { pattern: /alternance|apprentissage|stage/i, weight: 2 },
-            { pattern: /accompagnement|mentorat|tutorat/i, weight: 2 },
-            { pattern: /évolution|progression|carrière/i, weight: 1 },
-            
-            // Environnements junior-friendly
-            { pattern: /équipe\s+jeune|startup|scale[-\s]?up/i, weight: 1 },
-            { pattern: /innovation|créativité|dynamique/i, weight: 1 }
-        ];
-
-        const seniorIndicators = [
-            { pattern: /senior|expert|lead|chef/i, weight: 3 },
-            { pattern: /\d+\s+ans?\s+d[''']expérience/i, weight: 3 },
-            { pattern: /expérience\s+(requise|exigée|nécessaire)/i, weight: 2 },
-            { pattern: /autonomie\s+complète|responsabilité/i, weight: 2 }
-        ];
-
-        // Analyse Sans Diplôme avec nuances
-        const noDiplomaIndicators = [
-            // Mentions explicites
-            { pattern: /sans\s+diplô?me|aucun\s+diplô?me/i, weight: 4 },
-            { pattern: /formation\s+(assurée|fournie|interne)/i, weight: 3 },
-            { pattern: /nous\s+(vous\s+)?formons/i, weight: 3 },
-            
-            // Contextes favorables
-            { pattern: /motivation\s+avant\s+tout/i, weight: 3 },
-            { pattern: /personnalité\s+(prioritaire|importante)/i, weight: 2 },
-            { pattern: /savoir[-\s]être|qualités\s+humaines/i, weight: 2 },
-            { pattern: /reconversion|changement\s+de\s+voie/i, weight: 2 },
-            
-            // Alternance = souvent sans diplôme initial
-            { pattern: /alternance|apprentissage/i, weight: 2 },
-            { pattern: /contrat\s+(de\s+)?professionnalisation/i, weight: 2 }
-        ];
-
-        const diplomaRequiredIndicators = [
-            { pattern: /bac\s*\+\s*\d+|niveau\s+bac\s*\+/i, weight: 4 },
-            { pattern: /master|licence|ingénieur/i, weight: 3 },
-            { pattern: /diplô?me\s+(exigé|obligatoire|requis|nécessaire)/i, weight: 4 },
-            { pattern: /formation\s+supérieure/i, weight: 2 },
-            { pattern: /bts|dut|but/i, weight: 2 }
-        ];
-
-        // Calculer les scores
-        const juniorScore = this.calculateIndicatorScore(fullText, juniorIndicators);
-        const seniorScore = this.calculateIndicatorScore(fullText, seniorIndicators);
-        
-        const noDiplomaScore = this.calculateIndicatorScore(fullText, noDiplomaIndicators);
-        const diplomaScore = this.calculateIndicatorScore(fullText, diplomaRequiredIndicators);
-
-        return {
-            isJunior: juniorScore > seniorScore && juniorScore >= 2,
-            noDiplomaRequired: noDiplomaScore > diplomaScore && noDiplomaScore >= 2
-        };
-    }
-
-    calculateIndicatorScore(text, indicators) {
-        return indicators.reduce((score, { pattern, weight }) => {
-            return score + (pattern.test(text) ? weight : 0);
-        }, 0);
-    }
-
-    createContextCacheKey(title, description) {
-        const combined = `${title} ${description}`.toLowerCase()
-            .replace(/[^\w\s]/g, ' ')
-            .split(/\s+/)
-            .filter(word => word.length > 3)
-            .slice(0, 20)
-            .sort()
-            .join('_');
-        
-        return this.fastHash(combined);
-    }
-
-    fastHash(str) {
-        let hash = 0;
-        for (let i = 0; i < str.length; i++) {
-            const char = str.charCodeAt(i);
-            hash = ((hash << 5) - hash) + char;
-            hash |= 0;
-        }
-        return Math.abs(hash).toString(36);
-    }
-
-    setCacheValue(key, value) {
-        if (this.cache.size >= this.maxCacheSize) {
-            const toDelete = Array.from(this.cache.keys()).slice(0, Math.floor(this.maxCacheSize * 0.1));
-            toDelete.forEach(k => this.cache.delete(k));
-        }
-        this.cache.set(key, value);
-    }
-
-    delay(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
-    }
-
-    getPerformanceStats() {
-        const avgLatency = this.stats.totalRequests > 0 ? 
-            this.stats.totalLatency / this.stats.totalRequests : 0;
-        
-        return {
-            totalRequests: this.stats.totalRequests,
-            cacheHitRate: this.stats.totalRequests > 0 ? 
-                (this.stats.cacheHits / this.stats.totalRequests * 100).toFixed(1) + '%' : '0%',
-            averageLatency: Math.round(avgLatency) + 'ms',
-            errorRate: this.stats.totalRequests > 0 ? 
-                (this.stats.errors / this.stats.totalRequests * 100).toFixed(1) + '%' : '0%',
-            cacheSize: this.cache.size
-        };
-    }
-}
-
-class SmartJobSearch {
-    constructor() {
-        // Synonymes métier pour améliorer la recherche
-        this.synonyms = {
-            'data': ['données', 'database', 'base de données', 'bdd'],
-            'analyste': ['analyst', 'analyse', 'analytics', 'analytique'],
-            'développeur': ['dev', 'developer', 'programmeur', 'codeur', 'développeuse'],
-            'alternance': ['apprentissage', 'contrat pro', 'formation', 'apprenti'],
-            'stage': ['stagiaire', 'internship', 'période', 'intern'],
-            'junior': ['débutant', 'entry level', 'première expérience', 'jeune diplôme'],
-            'senior': ['expérimenté', 'expert', 'confirmé', 'lead'],
-            'python': ['py', 'django', 'flask', 'pandas'],
-            'javascript': ['js', 'react', 'vue', 'angular', 'node'],
-            'sql': ['mysql', 'postgresql', 'oracle', 'database']
-        };
-        
-        // Configuration Fuse.js pour recherche floue
-        this.fuseConfig = {
-            keys: [
-                { name: 'poste', weight: 0.4 },
-                { name: 'description_nettoyee', weight: 0.3 },
-                { name: 'contrat', weight: 0.2 },
-                { name: 'entreprise', weight: 0.1 }
-            ],
-            threshold: 0.4,
-            includeScore: true,
-            minMatchCharLength: 2,
-            ignoreLocation: true
-        };
-
-        // Mots vides français
-        this.stopWords = new Set([
-            'je', 'tu', 'il', 'elle', 'nous', 'vous', 'ils', 'elles', 
-            'le', 'la', 'les', 'un', 'une', 'des', 'du', 'de', 'et', 
-            'ou', 'où', 'que', 'qui', 'quoi', 'pour', 'par', 'avec', 
-            'dans', 'sur', 'chez', 'vers', 'à', 'en', 'ce', 'mon', 
-            'ma', 'son', 'sa', 'notre', 'votre', 'leur', 'cherche', 
-            'recherche', 'poste', 'emploi', 'travail', 'job'
-        ]);
-    }
-
-    // Analyse intelligente de la requête
-    analyzeQuery(query) {
-        const tokens = this.tokenize(query);
-        const expanded = this.expandSynonyms(tokens);
-        const intent = this.detectIntent(query);
-        
-        return {
-            original: tokens,
-            expanded: expanded,
-            intent: intent
-        };
-    }
-
-    // Tokenisation et nettoyage
-    tokenize(text) {
-        return text.toLowerCase()
-            .replace(/[^\w\sàáâãäåæçèéêëìíîïñòóôõöøùúûüýÿ]/g, ' ')
-            .split(/\s+/)
-            .filter(token => token.length > 1)
-            .filter(token => !this.stopWords.has(token));
-    }
-
-    // Expansion avec synonymes
-    expandSynonyms(tokens) {
-        const expanded = new Set(tokens);
-        
-        tokens.forEach(token => {
-            Object.keys(this.synonyms).forEach(key => {
-                if (key.includes(token) || this.synonyms[key].includes(token)) {
-                    expanded.add(key);
-                    this.synonyms[key].forEach(syn => expanded.add(syn));
-                }
-            });
-        });
-        
-        return Array.from(expanded);
-    }
-
-    // Détection d'intention dans la requête
-    detectIntent(query) {
-        const intent = {};
-        const lowerQuery = query.toLowerCase();
-        
-        // Détection de localisation
-        const locationMatch = lowerQuery.match(/(?:à|dans|région|ville)\s+(\w+)/i);
-        if (locationMatch) intent.location = locationMatch[1];
-        
-        // Détection de type de contrat
-        const contractMatch = lowerQuery.match(/(cdi|cdd|stage|alternance|freelance|temps partiel|temps plein)/i);
-        if (contractMatch) intent.contract = contractMatch[1];
-        
-        // Détection de niveau
-        const levelMatch = lowerQuery.match(/(junior|senior|débutant|expérimenté|confirmé)/i);
-        if (levelMatch) intent.level = levelMatch[1];
-        
-        return intent;
-    }
-
-    // Recherche hybride améliorée
-    smartSearch(query, jobsData) {
-        const analysis = this.analyzeQuery(query);
-        
-        // 1. Recherche exacte avec termes étendus
-        const exactResults = this.exactSearch(analysis.expanded, jobsData);
-        
-        // 2. Recherche floue avec Fuse.js
-        const fuse = new Fuse(jobsData, this.fuseConfig);
-        const fuseResults = fuse.search(query);
-        
-        // 3. Combiner et scorer les résultats
-        const combinedResults = this.combineResults(exactResults, fuseResults, analysis.intent);
-        
-        return combinedResults;
-    }
-
-    exactSearch(expandedTerms, jobsData) {
-        return jobsData.map((job, index) => {
-            const jobText = this.getJobSearchText(job);
-            let score = 0;
-            let matchedTerms = [];
-            
-            expandedTerms.forEach(term => {
-                if (jobText.includes(term.toLowerCase())) {
-                    // Score plus élevé si trouvé dans le titre
-                    if (job.poste.toLowerCase().includes(term.toLowerCase())) {
-                        score += 5;
-                    } else {
-                        score += 2;
-                    }
-                    matchedTerms.push(term);
-                }
-            });
-            
-            return { 
-                index, 
-                score, 
-                matchedTerms, 
-                type: 'exact'
-            };
-        }).filter(result => result.score > 0);
-    }
-
-    combineResults(exactResults, fuseResults, intent) {
-        const resultMap = new Map();
-        
-        // Ajouter résultats exacts
-        exactResults.forEach(result => {
-            resultMap.set(result.index, {
-                index: result.index,
-                score: result.score,
-                matchedTerms: result.matchedTerms,
-                types: ['exact']
-            });
-        });
-        
-        // Ajouter résultats Fuse.js
-        fuseResults.forEach(result => {
-            const index = result.refIndex;
-            const fuseScore = (1 - result.score) * 3; // Convertir en score positif
-            
-            if (resultMap.has(index)) {
-                resultMap.get(index).score += fuseScore;
-                resultMap.get(index).types.push('fuzzy');
-            } else {
-                resultMap.set(index, {
-                    index: index,
-                    score: fuseScore,
-                    matchedTerms: [],
-                    types: ['fuzzy']
-                });
-            }
-        });
-        
-        // Appliquer bonus d'intention
-        this.applyIntentBonus(resultMap, intent);
-        
-        // Trier par score décroissant
-        return Array.from(resultMap.values())
-            .sort((a, b) => b.score - a.score);
-    }
-
-    applyIntentBonus(resultMap, intent) {
-        if (Object.keys(intent).length === 0) return;
-        
-        resultMap.forEach((result, index) => {
-            const jobElement = document.querySelectorAll('.job-card')[index];
-            if (!jobElement) return;
-            
-            const jobText = this.getJobElementText(jobElement);
-            
-            // Bonus si l'intention correspond
-            if (intent.contract && jobText.includes(intent.contract.toLowerCase())) {
-                result.score += 3;
-            }
-            if (intent.level && jobText.includes(intent.level.toLowerCase())) {
-                result.score += 2;
-            }
-            if (intent.location && jobText.includes(intent.location.toLowerCase())) {
-                result.score += 2;
-            }
-        });
-    }
-
-    getJobSearchText(job) {
-        return `${job.poste} ${job.entreprise} ${job.description_nettoyee} ${job.contrat}`.toLowerCase();
-    }
-
-    getJobElementText(jobElement) {
-        const title = jobElement.querySelector('.job-title')?.textContent || '';
-        const company = jobElement.querySelector('.job-company')?.textContent || '';
-        const description = jobElement.querySelector('.job-description-text')?.textContent || '';
-        const infoItems = Array.from(jobElement.querySelectorAll('.job-info-item span'))
-            .map(span => span.textContent).join(' ');
-        
-        return `${title} ${company} ${description} ${infoItems}`.toLowerCase();
-    }
-}
-
-class JobsPagination {
-    constructor(jobsPerPage = 8) {
-        this.jobsPerPage = jobsPerPage;
-        this.currentPage = 1;
-        this.allJobs = document.querySelectorAll('.job-card');
-        this.filteredJobs = [...this.allJobs];
-        this.totalJobs = this.allJobs.length;
-        this.totalPages = Math.ceil(this.totalJobs / this.jobsPerPage);
-        
-        this.searchInput = document.getElementById('searchInput');
-        this.clearButton = document.getElementById('clearSearch');
-        this.searchResultsInfo = document.getElementById('searchResultsInfo');
-        
-        // Éléments de filtre
-        this.filterBanner = document.getElementById('filterBanner');
-        this.filterText = document.getElementById('filterText');
-        this.clearFilterBtn = document.getElementById('clearFilterBtn');
-        this.statCards = document.querySelectorAll('.stat-card');
-        
-        // État du filtre actuel
-        this.currentFilter = null;
-        this.activeStatCard = null;
-        
-        // Initialiser les analyseurs
-        this.smartSearch = new SmartJobSearch();
-        this.groqAnalyzer = new GroqContextualAnalyzer({
-            apiKey: window.GROQ_API_KEY || 'demo-key',
-            batchSize: 6
-        });
-        
-        // Cache pour les analyses Groq
-        this.groqAnalysisResults = new Map();
-        this.groqAnalysisInProgress = false;
-        
-        this.init();
-        this.initSearch();
-        this.initStatFilters();
-        this.calculateStats();
-        
-        // Lancer l'analyse contextuelle Groq de manière discrète
-        setTimeout(() => {
-            this.startGroqAnalysis();
-        }, 1000);
-    }
-
-    init() {
-        this.showPage(1);
-        this.renderPagination();
-    }
-
-    initSearch() {
-        let searchTimeout;
-        this.searchInput.addEventListener('input', (e) => {
-            clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(() => {
-                this.performSmartSearch(e.target.value);
-            }, 300);
-            
-            this.clearButton.style.display = e.target.value ? 'flex' : 'none';
-        });
-
-        this.clearButton.addEventListener('click', () => {
-            this.searchInput.value = '';
-            this.clearButton.style.display = 'none';
-            this.clearSearch();
-        });
-
-        this.searchInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                this.performSmartSearch(e.target.value);
-            }
-        });
-    }
-
-    initStatFilters() {
-        // Ajouter les événements de clic sur les cartes de statistiques
-        this.statCards.forEach(card => {
-            card.addEventListener('click', () => {
-                const filterType = card.dataset.filter;
-                this.toggleStatFilter(filterType, card);
-            });
-        });
-
-        // Événement pour effacer le filtre
-        this.clearFilterBtn.addEventListener('click', () => {
-            this.clearStatFilter();
-        });
-    }
-
-    toggleStatFilter(filterType, statCard) {
-        // Si on clique sur le même filtre, on le désactive
-        if (this.currentFilter === filterType) {
-            this.clearStatFilter();
-            return;
-        }
-
-        // Effacer la recherche si elle était active
-        if (this.searchInput.value.trim()) {
-            this.searchInput.value = '';
-            this.clearButton.style.display = 'none';
-            this.searchResultsInfo.innerHTML = '';
-        }
-
-        // Désactiver l'ancien filtre
-        if (this.activeStatCard) {
-            this.activeStatCard.classList.remove('active');
-        }
-
-        // Activer le nouveau filtre
-        this.currentFilter = filterType;
-        this.activeStatCard = statCard;
-        statCard.classList.add('active');
-
-        // Appliquer le filtre
-        this.applyStatFilter(filterType);
-        
-        // Afficher la bannière de filtre
-        this.showFilteredPage(1);
-        this.renderPagination();
-    }
-
-    clearSearch() {
-        this.filteredJobs = [...this.allJobs];
-        this.totalJobs = this.allJobs.length;
-        this.totalPages = Math.ceil(this.totalJobs / this.jobsPerPage);
-        this.currentPage = 1;
-        
-        this.searchResultsInfo.innerHTML = '';
-        document.getElementById('totalCount').textContent = `${this.totalJobs} offre${this.totalJobs > 1 ? 's' : ''}`;
-        
-        // Remettre les statistiques avec Groq si disponible
-        if (this.groqAnalysisResults.size > 0) {
-            this.calculateStatsWithGroq();
-        } else {
-            this.calculateStats();
-        }
-        
-        this.showPage(1);
-        this.renderPagination();
-    }
-
-    showPage(page) {
-        this.currentPage = page;
-        
-        // Masquer toutes les offres
-        this.allJobs.forEach(job => {
-            job.style.display = 'none';
-            job.classList.remove('hidden');
-        });
-
-        // Afficher les offres de la page courante
-        const start = (page - 1) * this.jobsPerPage;
-        const end = start + this.jobsPerPage;
-        
-        for (let i = start; i < end && i < this.totalJobs; i++) {
-            this.allJobs[i].style.display = 'flex';
-        }
-
-        this.renderPagination();
-    }
-
-    showFilteredPage(page) {
-        this.currentPage = page;
-        
-        // Masquer toutes les offres
-        this.allJobs.forEach(job => {
-            job.style.display = 'none';
-            job.classList.add('hidden');
-        });
-
-        // Afficher les offres filtrées de la page courante
-        const start = (page - 1) * this.jobsPerPage;
-        const end = start + this.jobsPerPage;
-        
-        for (let i = start; i < end && i < this.filteredJobs.length; i++) {
-            this.filteredJobs[i].element.style.display = 'flex';
-            this.filteredJobs[i].element.classList.remove('hidden');
-        }
-
-        this.renderPagination();
-    }
-
-    renderPagination() {
-        const pagination = document.getElementById('pagination');
-        pagination.innerHTML = '';
-
-        if (this.totalPages <= 1) {
-            return;
-        }
-
-        // Bouton précédent
-        const prevButton = this.createNavButton('‹', this.currentPage - 1, this.currentPage === 1);
-        pagination.appendChild(prevButton);
-
-        // Logique de pagination intelligente
-        const pages = this.getPageNumbers();
-        
-        pages.forEach((page, index) => {
-            if (page === '...') {
-                const dots = document.createElement('span');
-                dots.className = 'pagination-dots';
-                dots.textContent = '...';
-                pagination.appendChild(dots);
-            } else {
-                const pageButton = this.createPageButton(page, page === this.currentPage);
-                pagination.appendChild(pageButton);
-            }
-        });
-
-        // Bouton suivant
-        const nextButton = this.createNavButton('›', this.currentPage + 1, this.currentPage === this.totalPages);
-        pagination.appendChild(nextButton);
-    }
-
-    getPageNumbers() {
-        const pages = [];
-        const current = this.currentPage;
-        const total = this.totalPages;
-
-        if (total <= 7) {
-            for (let i = 1; i <= total; i++) {
-                pages.push(i);
-            }
-        } else {
-            pages.push(1);
-
-            if (current <= 4) {
-                for (let i = 2; i <= 5; i++) {
-                    pages.push(i);
-                }
-                pages.push('...');
-                pages.push(total);
-            } else if (current >= total - 3) {
-                pages.push('...');
-                for (let i = total - 4; i <= total; i++) {
-                    pages.push(i);
-                }
-            } else {
-                pages.push('...');
-                for (let i = current - 1; i <= current + 1; i++) {
-                    pages.push(i);
-                }
-                pages.push('...');
-                pages.push(total);
-            }
-        }
-
-        return pages;
-    }
-
-    createPageButton(page, isActive) {
-        const button = document.createElement('a');
-        button.className = `pagination-item ${isActive ? 'active' : ''}`;
-        button.textContent = page;
-        button.href = '#';
-        
-        button.addEventListener('click', (e) => {
-            e.preventDefault();
-            if (this.searchInput.value.trim() || this.currentFilter) {
-                this.showFilteredPage(page);
-            } else {
-                this.showPage(page);
-            }
-        });
-
-        return button;
-    }
-
-    createNavButton(symbol, targetPage, isDisabled) {
-        const button = document.createElement('a');
-        button.className = `pagination-nav ${isDisabled ? 'disabled' : ''}`;
-        button.innerHTML = symbol;
-        button.href = '#';
-
-        if (!isDisabled) {
-            button.addEventListener('click', (e) => {
-                e.preventDefault();
-                if (this.searchInput.value.trim() || this.currentFilter) {
-                    this.showFilteredPage(targetPage);
-                } else {
-                    this.showPage(targetPage);
-                }
-            });
-        }
-
-        return button;
-    }
-
-    // Calcul de statistiques de base (fallback)
-    calculateStats() {
-        const stats = {
-            alternance: 0,
-            cdi: 0,
-            cdd: 0,
-            stage: 0,
-            sansDiplome: 0,
-            junior: 0
-        };
-
-        this.allJobs.forEach(job => {
-            const jobText = this.smartSearch.getJobElementText(job);
-            
-            // Analyser le type de contrat
-            if (jobText.includes('alternance')) stats.alternance++;
-            if (jobText.includes('cdi')) stats.cdi++;
-            if (jobText.includes('cdd')) stats.cdd++;
-            if (jobText.includes('stage')) stats.stage++;
-            
-            // Analyse basique pour diplôme et junior
-            if (jobText.includes('sans diplôme') || 
-                jobText.includes('sans diplome') || 
-                jobText.includes('formation assurée') ||
-                jobText.includes('nous vous formons')) {
-                stats.sansDiplome++;
-            }
-            
-            if (jobText.includes('junior') || 
-                jobText.includes('débutant') || 
-                jobText.includes('premier emploi') ||
-                jobText.includes('entry level')) {
-                stats.junior++;
-            }
-        });
-
-        this.updateStatsDisplay(stats);
-    }
-
-    updateStatsDisplay(stats) {
-        document.getElementById('statAlternance').textContent = stats.alternance;
-        document.getElementById('statCDI').textContent = stats.cdi;
-        document.getElementById('statCDD').textContent = stats.cdd;
-        document.getElementById('statStage').textContent = stats.stage;
-        document.getElementById('statSansDiplome').textContent = stats.sansDiplome;
-        document.getElementById('statJunior').textContent = stats.junior;
-    }
-
-    updateSearchStats() {
-        if (this.filteredJobs.length === 0 || (this.searchInput.value.trim() === '' && !this.currentFilter)) {
-            if (this.groqAnalysisResults.size > 0) {
-                this.calculateStatsWithGroq();
-            } else {
-                this.calculateStats();
-            }
-            return;
-        }
-
-        // Calculer les stats en temps réel pour les résultats filtrés
-        const stats = {
-            alternance: 0,
-            cdi: 0,
-            cdd: 0,
-            stage: 0,
-            sansDiplome: 0,
-            junior: 0
-        };
-
-        this.filteredJobs.forEach(jobObj => {
-            const jobText = this.smartSearch.getJobElementText(jobObj.element);
-            const jobIndex = Array.from(this.allJobs).indexOf(jobObj.element);
-            
-            // Types de contrat (analyse rapide par mots-clés)
-            if (jobText.includes('alternance')) stats.alternance++;
-            if (jobText.includes('cdi')) stats.cdi++;
-            if (jobText.includes('cdd')) stats.cdd++;
-            if (jobText.includes('stage')) stats.stage++;
-            
-            // Utiliser Groq si disponible pour diplôme et junior
-            const groqAnalysis = this.groqAnalysisResults.get(jobIndex);
-            if (groqAnalysis) {
-                if (groqAnalysis.noDiplomaRequired) stats.sansDiplome++;
-                if (groqAnalysis.isJunior) stats.junior++;
-            } else {
-                // Fallback rapide pour la recherche en temps réel
-                if (jobText.includes('sans diplôme') || 
-                    jobText.includes('formation assurée') ||
-                    jobText.includes('nous vous formons') ||
-                    (jobText.includes('alternance') && !jobText.includes('bac+'))) {
-                    stats.sansDiplome++;
-                }
-                if (jobText.includes('junior') || 
-                    jobText.includes('débutant') ||
-                    jobText.includes('première expérience') ||
-                    jobText.includes('entry level')) {
-                    stats.junior++;
-                }
-            }
-        });
-
-        // Mise à jour instantanée des statistiques
-        this.updateStatsDisplay(stats);
-    }
-
-    applyStatFilter(filterType) {
-        this.filteredJobs = [];
-
-        this.allJobs.forEach((jobElement, index) => {
-            let matchesFilter = false;
-            const jobText = this.smartSearch.getJobElementText(jobElement);
-
-            switch (filterType) {
-                case 'alternance':
-                    matchesFilter = jobText.includes('alternance');
-                    break;
-                case 'cdi':
-                    matchesFilter = jobText.includes('cdi');
-                    break;
-                case 'cdd':
-                    matchesFilter = jobText.includes('cdd');
-                    break;
-                case 'stage':
-                    matchesFilter = jobText.includes('stage');
-                    break;
-                case 'sans-diplome':
-                    // Utiliser l'analyse Groq si disponible
-                    const groqAnalysis = this.groqAnalysisResults.get(index);
-                    if (groqAnalysis) {
-                        matchesFilter = groqAnalysis.noDiplomaRequired;
-                    } else {
-                        // Fallback rapide
-                        matchesFilter = jobText.includes('sans diplôme') || 
-                                      jobText.includes('formation assurée') ||
-                                      jobText.includes('nous vous formons') ||
-                                      (jobText.includes('alternance') && !jobText.includes('bac+'));
-                    }
-                    break;
-                case 'junior':
-                    // Utiliser l'analyse Groq si disponible
-                    const groqAnalysisJunior = this.groqAnalysisResults.get(index);
-                    if (groqAnalysisJunior) {
-                        matchesFilter = groqAnalysisJunior.isJunior;
-                    } else {
-                        // Fallback rapide
-                        matchesFilter = jobText.includes('junior') || 
-                                      jobText.includes('débutant') ||
-                                      jobText.includes('première expérience') ||
-                                      jobText.includes('entry level');
-                    }
-                    break;
-            }
-
-            if (matchesFilter) {
-                this.filteredJobs.push({
-                    element: jobElement,
-                    score: 1,
-                    terms: [filterType]
-                });
-            }
-        });
-
-        this.updateFilterResults();
-    }
-
-    showFilterBanner(filterType) {
-        const filterLabels = {
-            'alternance': 'Offres en alternance',
-            'cdi': 'Offres en CDI',
-            'cdd': 'Offres en CDD',
-            'stage': 'Offres de stage',
-            'sans-diplome': 'Offres sans diplôme requis',
-            'junior': 'Offres junior'
-        };
-
-        this.filterText.textContent = filterLabels[filterType] || 'Filtre actif';
-        this.filterBanner.classList.add('show');
-    }
-
-    clearStatFilter() {
-        // Désactiver le filtre actuel
-        this.currentFilter = null;
-        if (this.activeStatCard) {
-            this.activeStatCard.classList.remove('active');
-            this.activeStatCard = null;
-        }
-
-        // Masquer la bannière
-        this.filterBanner.classList.remove('show');
-
-        // Restaurer toutes les offres
-        this.clearSearch();
-    }
-
-    updateFilterResults() {
-        // Masquer toutes les offres
-        this.allJobs.forEach(job => {
-            job.classList.add('hidden');
-        });
-
-        // Mettre à jour les compteurs
-        this.totalJobs = this.filteredJobs.length;
-        this.totalPages = Math.ceil(this.totalJobs / this.jobsPerPage);
-        this.currentPage = 1;
-
-        // Afficher les informations de filtre
-        if (this.filteredJobs.length === 0) {
-            this.searchResultsInfo.innerHTML = '<span style="color: #ef4444;">Aucune offre trouvée pour ce filtre</span>';
-        } else {
-            this.searchResultsInfo.innerHTML = `
-                <span style="color: #10b981;">
-                    ${this.filteredJobs.length} offre${this.filteredJobs.length > 1 ? 's' : ''} correspond${this.filteredJobs.length > 1 ? 'ent' : ''} au filtre
-                </span>
-            `;
-        }
-
-        // Mettre à jour le compteur principal
-        document.getElementById('totalCount').textContent = `${this.filteredJobs.length} offre${this.filteredJobs.length > 1 ? 's' : ''}`;
-
-        // Mettre à jour les statistiques pour les résultats filtrés
-        this.updateFilterStats();
-
-        this.showFilteredPage(1);
-        this.renderPagination();
-    }
-
-    updateFilterStats() {
-        if (this.filteredJobs.length === 0 || !this.currentFilter) {
-            if (this.groqAnalysisResults.size > 0) {
-                this.calculateStatsWithGroq();
-            } else {
-                this.calculateStats();
-            }
-            return;
-        }
-
-        // Calculer les stats pour les résultats filtrés
-        const stats = {
-            alternance: 0,
-            cdi: 0,
-            cdd: 0,
-            stage: 0,
-            sansDiplome: 0,
-            junior: 0
-        };
-
-        this.filteredJobs.forEach(jobObj => {
-            const jobText = this.smartSearch.getJobElementText(jobObj.element);
-            const jobIndex = Array.from(this.allJobs).indexOf(jobObj.element);
-            
-            // Types de contrat (analyse rapide par mots-clés)
-            if (jobText.includes('alternance')) stats.alternance++;
-            if (jobText.includes('cdi')) stats.cdi++;
-            if (jobText.includes('cdd')) stats.cdd++;
-            if (jobText.includes('stage')) stats.stage++;
-            
-            // Utiliser Groq si disponible pour diplôme et junior
-            const groqAnalysis = this.groqAnalysisResults.get(jobIndex);
-            if (groqAnalysis) {
-                if (groqAnalysis.noDiplomaRequired) stats.sansDiplome++;
-                if (groqAnalysis.isJunior) stats.junior++;
-            } else {
-                // Fallback rapide pour le filtrage en temps réel
-                if (jobText.includes('sans diplôme') || 
-                    jobText.includes('formation assurée') ||
-                    jobText.includes('nous vous formons') ||
-                    (jobText.includes('alternance') && !jobText.includes('bac+'))) {
-                    stats.sansDiplome++;
-                }
-                if (jobText.includes('junior') || 
-                    jobText.includes('débutant') ||
-                    jobText.includes('première expérience') ||
-                    jobText.includes('entry level')) {
-                    stats.junior++;
-                }
-            }
-        });
-
-        // Mise à jour instantanée des statistiques
-        this.updateStatsDisplay(stats);
-    }
-
-    async startGroqAnalysis() {
-        if (this.groqAnalysisInProgress) return;
-        
-        try {
-            this.groqAnalysisInProgress = true;
-            
-            // Analyse discrète en arrière-plan
-            const jobsData = Array.from(this.allJobs).map(jobElement => ({
-                title: jobElement.querySelector('.job-title')?.textContent || '',
-                company: jobElement.querySelector('.job-company')?.textContent || '',
-                description: jobElement.querySelector('.job-description-text')?.textContent || ''
+    class JobPageManager {
+        constructor(jobsPerPage = 8) {
+            this.jobsPerPage = jobsPerPage;
+            this.currentPage = 1;
+
+            this.allJobElements = Array.from(document.querySelectorAll('.job-card'));
+            this.allJobsData = this.allJobElements.map(el => ({
+                id: el.dataset.jobId,
+                title: el.querySelector('.job-title').textContent,
+                company: el.querySelector('.job-company').textContent,
+                description: el.querySelector('.job-description-text')?.textContent || '',
+                contract: el.querySelector('.job-info-item:nth-child(2) span').textContent
             }));
             
-            // Lancer l'analyse silencieusement
-            const analyses = await this.groqAnalyzer.analyzeBatchContextual(jobsData);
-            
-            // Stocker les résultats
-            analyses.forEach((analysis, index) => {
-                this.groqAnalysisResults.set(index, analysis);
+            this.visibleJobElements = [...this.allJobElements];
+
+            this.searchInput = document.getElementById('searchInput');
+            this.clearButton = document.getElementById('clearSearch');
+            this.searchResultsInfo = document.getElementById('searchResultsInfo');
+            this.totalCountElement = document.getElementById('totalCount');
+            this.paginationContainer = document.getElementById('paginationContainer');
+
+            const apiKey = '{{ config.GROQ_API_KEY if config and config.GROQ_API_KEY else "demo-key" }}';
+            this.groqSearch = new GroqIntelligentSearch(apiKey);
+
+            this.init();
+        }
+
+        init() {
+            let searchTimeout;
+            this.searchInput.addEventListener('input', (e) => {
+                this.clearButton.style.display = e.target.value ? 'flex' : 'none';
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => this.handleSearch(e.target.value), 500);
+            });
+
+            this.clearButton.addEventListener('click', () => {
+                this.searchInput.value = '';
+                this.clearButton.style.display = 'none';
+                this.handleSearch('');
             });
             
-            // Mettre à jour les statistiques sans indication visuelle
-            this.calculateStatsWithGroq();
-            
-        } catch (error) {
-            console.error('Groq analysis failed:', error);
-            // En cas d'erreur, continuer avec l'analyse basique
-            this.calculateStats();
-        } finally {
-            this.groqAnalysisInProgress = false;
+            this.renderPage(1);
         }
-    }
 
-    calculateStatsWithGroq() {
-        const stats = {
-            alternance: 0,
-            cdi: 0,
-            cdd: 0,
-            stage: 0,
-            sansDiplome: 0,
-            junior: 0
-        };
-
-        this.allJobs.forEach((job, index) => {
-            const jobText = this.smartSearch.getJobElementText(job);
-            
-            // Analyser le type de contrat (règles simples)
-            if (jobText.includes('alternance')) stats.alternance++;
-            if (jobText.includes('cdi')) stats.cdi++;
-            if (jobText.includes('cdd')) stats.cdd++;
-            if (jobText.includes('stage')) stats.stage++;
-            
-            // Utiliser les résultats Groq pour diplôme et junior
-            const groqAnalysis = this.groqAnalysisResults.get(index);
-            if (groqAnalysis) {
-                if (groqAnalysis.noDiplomaRequired) {
-                    stats.sansDiplome++;
-                }
-                if (groqAnalysis.isJunior) {
-                    stats.junior++;
-                }
+        async handleSearch(query) {
+            if (!query.trim()) {
+                this.visibleJobElements = [...this.allJobElements];
+                this.searchResultsInfo.innerHTML = '';
+                this.renderPage(1);
+                return;
             }
-        });
 
-        this.updateStatsDisplay(stats);
-    }
-
-    performSmartSearch(query) {
-        if (!query.trim()) {
-            this.clearSearch();
-            return;
-        }
-
-        // Effacer le filtre statistique si actif
-        if (this.currentFilter) {
-            this.clearStatFilter();
-        }
-
-        // Préparer les données pour la recherche
-        const jobsData = this.getAllJobsData();
-        
-        // Utiliser la recherche intelligente
-        const results = this.smartSearch.smartSearch(query, jobsData);
-        
-        // Convertir en format attendu
-        this.filteredJobs = results.map(result => ({
-            element: this.allJobs[result.index],
-            score: result.score,
-            terms: result.matchedTerms || []
-        }));
-
-        this.updateSearchResults();
-    }
-
-    getAllJobsData() {
-        return Array.from(this.allJobs).map(jobElement => ({
-            poste: jobElement.querySelector('.job-title')?.textContent || '',
-            entreprise: jobElement.querySelector('.job-company')?.textContent || '',
-            description_nettoyee: jobElement.querySelector('.job-description-text')?.textContent || '',
-            contrat: Array.from(jobElement.querySelectorAll('.job-info-item span'))[1]?.textContent || ''
-        }));
-    }
-
-    updateSearchResults() {
-        // Masquer toutes les offres
-        this.allJobs.forEach(job => {
-            job.classList.add('hidden');
-        });
-
-        // Mettre à jour les compteurs
-        this.totalJobs = this.filteredJobs.length;
-        this.totalPages = Math.ceil(this.totalJobs / this.jobsPerPage);
-        this.currentPage = 1;
-
-        // Afficher les informations de recherche
-        if (this.filteredJobs.length === 0) {
-            this.searchResultsInfo.innerHTML = '<span style="color: #ef4444;">Aucune offre trouvée pour cette recherche</span>';
-        } else {
-            const searchTerms = this.filteredJobs[0]?.terms?.join(', ') || '';
             this.searchResultsInfo.innerHTML = `
-                <span style="color: #10b981;">
-                    ${this.filteredJobs.length} offre${this.filteredJobs.length > 1 ? 's' : ''} trouvée${this.filteredJobs.length > 1 ? 's' : ''}
-                    ${searchTerms ? ` - Mots-clés détectés: ${searchTerms}` : ''}
-                </span>
-            `;
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <span class="ms-2">Analyse en cours...</span>`;
+
+            const matchingIds = await this.groqSearch.filterJobs(query, this.allJobsData);
+            
+            this.visibleJobElements = this.allJobElements.filter(el => matchingIds.includes(el.dataset.jobId));
+            
+            if (this.visibleJobElements.length === 0) {
+                this.searchResultsInfo.innerHTML = '<span style="color: #ef4444;">Aucune offre trouvée pour cette recherche.</span>';
+            } else {
+                 this.searchResultsInfo.innerHTML = `<span style="color: #10b981;">${this.visibleJobElements.length} offre(s) pertinente(s) trouvée(s).</span>`;
+            }
+            
+            this.renderPage(1);
+        }
+        
+        renderPage(page) {
+            this.currentPage = page;
+            this.totalCountElement.textContent = this.visibleJobElements.length;
+
+            this.allJobElements.forEach(job => job.classList.add('hidden'));
+
+            const totalPages = Math.ceil(this.visibleJobElements.length / this.jobsPerPage);
+            if (totalPages === 0) {
+                this.paginationContainer.style.display = 'none';
+                return;
+            }
+            this.paginationContainer.style.display = 'flex';
+
+            const start = (page - 1) * this.jobsPerPage;
+            const end = start + this.jobsPerPage;
+            const pageJobs = this.visibleJobElements.slice(start, end);
+
+            pageJobs.forEach(job => job.classList.remove('hidden'));
+            
+            this.renderPagination(totalPages);
+        }
+        
+        renderPagination(totalPages) {
+            const pagination = document.getElementById('pagination');
+            pagination.innerHTML = '';
+
+            if (totalPages <= 1) return;
+
+            pagination.appendChild(this.createNavButton('‹', this.currentPage - 1, this.currentPage === 1));
+
+            for (let i = 1; i <= totalPages; i++) {
+                pagination.appendChild(this.createPageButton(i, i === this.currentPage));
+            }
+
+            pagination.appendChild(this.createNavButton('›', this.currentPage + 1, this.currentPage === totalPages));
         }
 
-        // Mettre à jour le compteur principal
-        document.getElementById('totalCount').textContent = `${this.filteredJobs.length} offre${this.filteredJobs.length > 1 ? 's' : ''}`;
+        createPageButton(page, isActive) {
+            const button = document.createElement('a');
+            button.className = `pagination-item ${isActive ? 'active' : ''}`;
+            button.textContent = page;
+            button.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.renderPage(page);
+            });
+            return button;
+        }
 
-        // Mettre à jour les statistiques pour les résultats filtrés
-        this.updateSearchStats();
-
-        this.showFilteredPage(1);
-        this.renderPagination();
+        createNavButton(symbol, targetPage, isDisabled) {
+            const button = document.createElement('a');
+            button.className = `pagination-nav ${isDisabled ? 'disabled' : ''}`;
+            button.innerHTML = symbol;
+            if (!isDisabled) {
+                button.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.renderPage(targetPage);
+                });
+            }
+            return button;
+        }
     }
-}
-document.addEventListener('DOMContentLoaded', function() {
-    new JobsPagination(8);
+
+    new JobPageManager(9); // 9 offres par page
 });
 </script>
 {% endblock %}
