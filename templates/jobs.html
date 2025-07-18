@@ -148,16 +148,7 @@
         font-size: 0.95rem;
     }
 
-    .jobs-count {
-        background: var(--primary-color);
-        color: white;
-        padding: 0.25rem 0.75rem;
-        border-radius: 9999px;
-        font-size: 0.75rem;
-        font-weight: 600;
-        margin-left: 0.5rem;
-    }
-
+    /* Search Styles */
     .search-container {
         margin-top: 1.5rem;
         margin-bottom: 1rem;
@@ -223,19 +214,58 @@
         margin-top: 0.75rem;
         font-size: 0.875rem;
         color: #6b7280;
-        height: 20px; /* Reserve space to avoid layout shifts */
     }
-    
-    .search-results-info .spinner-border {
-        width: 1rem;
-        height: 1rem;
-        border-width: .2em;
+
+    .search-highlight {
+        background: rgba(99, 102, 241, 0.1);
+        border-radius: 0.25rem;
+        padding: 0.125rem 0.25rem;
+        font-weight: 600;
+        color: var(--primary-color);
     }
 
     .job-card.hidden {
         display: none !important;
     }
 
+    .loading-indicator {
+        text-align: center;
+        padding: 1rem;
+        color: #6b7280;
+        font-style: italic;
+    }
+
+    .keywords-display {
+        margin-top: 0.5rem;
+        padding: 0.5rem;
+        background: #f8fafc;
+        border-radius: 0.375rem;
+        border: 1px solid #e2e8f0;
+    }
+
+    .keywords-title {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #475569;
+        margin-bottom: 0.25rem;
+    }
+
+    .keywords-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.25rem;
+    }
+
+    .keyword-tag {
+        padding: 0.125rem 0.375rem;
+        background: var(--primary-color);
+        color: white;
+        border-radius: 0.25rem;
+        font-size: 0.625rem;
+        font-weight: 500;
+    }
+    
+    /* Pagination Styles */
     .pagination-container {
         display: flex;
         justify-content: center;
@@ -281,6 +311,18 @@
         color: white;
     }
 
+    .pagination-item.disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        pointer-events: none;
+    }
+
+    .pagination-dots {
+        padding: 0 0.5rem;
+        color: #9ca3af;
+        font-weight: 500;
+    }
+
     .pagination-nav {
         display: flex;
         align-items: center;
@@ -313,22 +355,32 @@
             padding: 1rem;
         }
         
+        .job-info {
+            grid-template-columns: 1fr;
+        }
+        
         .job-actions {
             flex-direction: column;
+        }
+
+        .pagination {
+            gap: 0.25rem;
         }
 
         .pagination-item, .pagination-nav {
             width: 35px;
             height: 35px;
+            font-size: 0.8rem;
+        }
+
+        .search-container {
+            margin-top: 1rem;
         }
     }
 </style>
 
 <div class="page-header">
-    <h1 class="page-title">
-        Offres d'emploi
-        <span class="jobs-count" id="totalCount">{{ jobs|length }}</span>
-    </h1>
+    <h1 class="page-title">Offres d'emploi</h1>
     <p class="page-subtitle">Découvrez les opportunités disponibles et lancez votre entretien de simulation</p>
     
     <div class="search-container">
@@ -338,7 +390,7 @@
                 type="text" 
                 id="searchInput" 
                 class="search-input" 
-                placeholder="Rechercher un poste, une technologie, un type de contrat..."
+                placeholder="Décrivez ce que vous recherchez : ex. 'Je cherche une alternance data analyst avec des compétences SQL et Power BI'"
                 autocomplete="off"
             >
             <button id="clearSearch" class="clear-search" style="display: none;">
@@ -346,21 +398,34 @@
             </button>
         </div>
         <div class="search-results-info" id="searchResultsInfo"></div>
+        <div id="keywordsDisplay" class="keywords-display" style="display: none;">
+            <div class="keywords-title">Mots-clés détectés :</div>
+            <div class="keywords-list" id="keywordsList"></div>
+        </div>
     </div>
 </div>
 
 <div class="jobs-container" id="jobsContainer">
     {% for job in jobs %}
-    <div class="job-card" data-job-id="{{ job.id }}">
+    <div class="job-card" data-job-index="{{ loop.index0 }}">
         <div class="job-header">
             <h2 class="job-title">{{ job.poste }}</h2>
             <div class="job-company">{{ job.entreprise }}</div>
         </div>
         
         <div class="job-info">
-            <div class="job-info-item"><i class="fas fa-map-marker-alt"></i><span>{{ job.ville }}</span></div>
-            <div class="job-info-item"><i class="fas fa-file-contract"></i><span>{{ job.contrat }}</span></div>
-            <div class="job-info-item"><i class="fas fa-calendar-alt"></i><span>{{ job.publication }}</span></div>
+            <div class="job-info-item">
+                <i class="fas fa-map-marker-alt"></i>
+                <span>{{ job.ville }}</span>
+            </div>
+            <div class="job-info-item">
+                <i class="fas fa-file-contract"></i>
+                <span>{{ job.contrat }}</span>
+            </div>
+            <div class="job-info-item">
+                <i class="fas fa-calendar-alt"></i>
+                <span>{{ job.publication }}</span>
+            </div>
         </div>
 
         {% if job.get('description_nettoyee') %}
@@ -371,221 +436,438 @@
         {% endif %}
 
         <div class="job-actions">
-            <a href="{{ job.lien }}" target="_blank" class="job-link"><i class="fas fa-external-link-alt"></i> Voir l'offre</a>
-            <a href="{{ url_for('interview_ai', job_id=job.id) }}" class="interview-link"><i class="fas fa-microphone"></i> Entretien</a>
+            <a href="{{ job.lien }}" target="_blank" class="job-link">
+                <i class="fas fa-external-link-alt"></i>
+                Voir l'offre
+            </a>
+            <a href="{{ url_for('interview_ai', job_id=job.id) }}" class="interview-link">
+                <i class="fas fa-microphone"></i>
+                Entretien
+            </a>
         </div>
     </div>
     {% endfor %}
 </div>
 
-<div class="pagination-container" id="paginationContainer">
-    <nav class="pagination" id="pagination"></nav>
+<div class="pagination-container">
+    <nav class="pagination" id="pagination">
+        </nav>
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    
-    class GroqIntelligentSearch {
-        constructor(apiKey) {
-            this.apiKey = apiKey;
-            this.model = 'llama-3.1-8b-instant';
-            this.baseURL = 'https://api.groq.com/openai/v1';
+class GroqJobSearch {
+    constructor() {
+        this.groqApiKey = 'YOUR_GROQ_API_KEY'; // Remplacez par votre clé API Groq
+        this.groqEndpoint = 'https://api.groq.com/openai/v1/chat/completions';
+    }
+
+    async extractKeywords(query) {
+        try {
+            const prompt = `Extrait les mots-clés pertinents de cette recherche d'emploi en français. 
+            Retourne uniquement une liste de mots-clés séparés par des virgules, sans explication.
+            
+            Recherche: "${query}"
+            
+            Concentre-toi sur :
+            - Type de contrat (CDI, CDD, stage, alternance, freelance)
+            - Métier/poste (développeur, analyst, manager, etc.)
+            - Compétences techniques (SQL, Python, JavaScript, etc.)
+            - Secteur d'activité
+            - Niveau d'expérience (junior, senior, débutant)
+            - Localisation si mentionnée
+            
+            Réponds uniquement avec les mots-clés séparés par des virgules:`;
+
+            const response = await fetch(this.groqEndpoint, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${this.groqApiKey}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    model: 'llama3-8b-8192',
+                    messages: [
+                        {
+                            role: 'user',
+                            content: prompt
+                        }
+                    ],
+                    temperature: 0.1,
+                    max_tokens: 100
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error(`Erreur API Groq: ${response.status}`);
+            }
+
+            const data = await response.json();
+            const keywords = data.choices[0].message.content.trim()
+                .split(',')
+                .map(keyword => keyword.trim().toLowerCase())
+                .filter(keyword => keyword.length > 0);
+
+            return keywords;
+        } catch (error) {
+            console.error('Erreur lors de l\'extraction des mots-clés:', error);
+            // Fallback : extraction simple si Groq échoue
+            return this.fallbackKeywordExtraction(query);
+        }
+    }
+
+    fallbackKeywordExtraction(query) {
+        const commonKeywords = {
+            'alternance': ['alternance', 'apprentissage', 'contrat pro'],
+            'stage': ['stage', 'stagiaire', 'internship'],
+            'cdi': ['cdi', 'temps plein', 'permanent'],
+            'cdd': ['cdd', 'temporaire', 'contrat determiné'],
+            'data': ['data', 'données', 'analyst', 'analytics'],
+            'développeur': ['développeur', 'developer', 'dev', 'programmeur'],
+            'sql': ['sql', 'mysql', 'postgresql', 'database'],
+            'python': ['python', 'django', 'flask'],
+            'javascript': ['javascript', 'js', 'react', 'vue', 'angular'],
+            'power bi': ['power bi', 'powerbi', 'bi'],
+            'excel': ['excel', 'vba'],
+            'junior': ['junior', 'débutant', 'entry level'],
+            'senior': ['senior', 'expérimenté', 'confirmé']
+        };
+
+        const extractedKeywords = [];
+        const lowerQuery = query.toLowerCase();
+
+        Object.entries(commonKeywords).forEach(([mainKeyword, variants]) => {
+            variants.forEach(variant => {
+                if (lowerQuery.includes(variant)) {
+                    extractedKeywords.push(mainKeyword);
+                }
+            });
+        });
+
+        return [...new Set(extractedKeywords)];
+    }
+
+    filterJobs(keywords, jobsData) {
+        return jobsData.map((job, index) => {
+            const jobText = this.getJobSearchText(job);
+            let score = 0;
+            let matchedKeywords = [];
+
+            keywords.forEach(keyword => {
+                if (jobText.includes(keyword.toLowerCase())) {
+                    // Bonus si le mot-clé est dans le titre
+                    if (job.poste.toLowerCase().includes(keyword.toLowerCase())) {
+                        score += 5;
+                    }
+                    // Bonus si le mot-clé est dans le type de contrat
+                    else if (job.contrat.toLowerCase().includes(keyword.toLowerCase())) {
+                        score += 4;
+                    }
+                    // Score normal pour les autres occurrences
+                    else {
+                        score += 2;
+                    }
+                    matchedKeywords.push(keyword);
+                }
+            });
+
+            return {
+                index,
+                score,
+                matchedKeywords,
+                jobData: job
+            };
+        }).filter(result => result.score > 0)
+          .sort((a, b) => b.score - a.score);
+    }
+
+    getJobSearchText(job) {
+        return `${job.poste} ${job.entreprise} ${job.description_nettoyee} ${job.contrat} ${job.ville}`.toLowerCase();
+    }
+}
+
+class JobsPagination {
+    constructor(jobsPerPage = 8) {
+        this.jobsPerPage = jobsPerPage;
+        this.currentPage = 1;
+        this.allJobs = document.querySelectorAll('.job-card');
+        this.filteredJobs = [...this.allJobs];
+        this.totalJobs = this.allJobs.length;
+        this.totalPages = Math.ceil(this.totalJobs / this.jobsPerPage);
+        
+        this.searchInput = document.getElementById('searchInput');
+        this.clearButton = document.getElementById('clearSearch');
+        this.searchResultsInfo = document.getElementById('searchResultsInfo');
+        this.keywordsDisplay = document.getElementById('keywordsDisplay');
+        this.keywordsList = document.getElementById('keywordsList');
+        
+        this.groqSearch = new GroqJobSearch();
+        
+        this.init();
+        this.initSearch();
+    }
+
+    init() {
+        this.showPage(1);
+        this.renderPagination();
+    }
+
+    initSearch() {
+        let searchTimeout;
+        this.searchInput.addEventListener('input', (e) => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                this.performGroqSearch(e.target.value);
+            }, 500); // Délai plus long pour éviter trop d'appels API
+            
+            this.clearButton.style.display = e.target.value ? 'flex' : 'none';
+        });
+
+        this.clearButton.addEventListener('click', () => {
+            this.searchInput.value = '';
+            this.clearButton.style.display = 'none';
+            this.clearSearch();
+        });
+
+        this.searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                this.performGroqSearch(e.target.value);
+            }
+        });
+    }
+
+    async performGroqSearch(query) {
+        if (!query.trim()) {
+            this.clearSearch();
+            return;
         }
 
-        createPrompt(query, jobs) {
-            return `
-                Analyse la requête de l'utilisateur et filtre la liste d'offres d'emploi (JSON).
-                La requête est : "${query}".
-                
-                Interprète l'intention de l'utilisateur (technologie, poste, niveau d'expérience, type de contrat, lieu, etc.).
-                
-                Liste des offres :
-                ${JSON.stringify(jobs)}
-                
-                Réponds UNIQUEMENT avec un objet JSON contenant une seule clé "matching_ids", qui est un tableau des 'id' des offres qui correspondent le mieux.
-                Exemple de réponse attendue : {"matching_ids": ["id1", "id3", "id8"]}
-                Ne retourne rien d'autre. Si aucune offre ne correspond, retourne {"matching_ids": []}.
+        // Afficher un indicateur de chargement
+        this.searchResultsInfo.innerHTML = '<div class="loading-indicator">Analyse de votre recherche...</div>';
+        this.keywordsDisplay.style.display = 'none';
+
+        try {
+            const keywords = await this.groqSearch.extractKeywords(query);
+            
+            if (keywords.length === 0) {
+                this.searchResultsInfo.innerHTML = '<span style="color: #ef4444;">Aucun mot-clé pertinent détecté</span>';
+                return;
+            }
+
+            // Afficher les mots-clés détectés
+            this.displayKeywords(keywords);
+
+            const jobsData = this.getAllJobsData();
+            const results = this.groqSearch.filterJobs(keywords, jobsData);
+
+            this.filteredJobs = results.map(result => ({
+                element: this.allJobs[result.index],
+                score: result.score,
+                keywords: result.matchedKeywords
+            }));
+
+            this.updateSearchResults();
+        } catch (error) {
+            console.error('Erreur lors de la recherche:', error);
+            this.searchResultsInfo.innerHTML = '<span style="color: #ef4444;">Erreur lors de la recherche</span>';
+        }
+    }
+
+    displayKeywords(keywords) {
+        this.keywordsList.innerHTML = keywords.map(keyword => 
+            `<span class="keyword-tag">${keyword}</span>`
+        ).join('');
+        this.keywordsDisplay.style.display = 'block';
+    }
+
+    clearSearch() {
+        this.filteredJobs = [...this.allJobs];
+        this.totalJobs = this.allJobs.length;
+        this.totalPages = Math.ceil(this.totalJobs / this.jobsPerPage);
+        this.currentPage = 1;
+        
+        this.searchResultsInfo.innerHTML = '';
+        this.keywordsDisplay.style.display = 'none';
+        
+        this.showPage(1);
+        this.renderPagination();
+    }
+
+    showPage(page) {
+        this.currentPage = page;
+        
+        this.allJobs.forEach(job => {
+            job.style.display = 'none';
+            job.classList.remove('hidden');
+        });
+
+        const start = (page - 1) * this.jobsPerPage;
+        const end = start + this.jobsPerPage;
+        
+        for (let i = start; i < end && i < this.totalJobs; i++) {
+            this.allJobs[i].style.display = 'flex';
+        }
+
+        this.renderPagination();
+    }
+
+    showFilteredPage(page) {
+        this.currentPage = page;
+        
+        this.allJobs.forEach(job => {
+            job.style.display = 'none';
+            job.classList.add('hidden');
+        });
+
+        const start = (page - 1) * this.jobsPerPage;
+        const end = start + this.jobsPerPage;
+        
+        for (let i = start; i < end && i < this.filteredJobs.length; i++) {
+            this.filteredJobs[i].element.style.display = 'flex';
+            this.filteredJobs[i].element.classList.remove('hidden');
+        }
+
+        this.renderPagination();
+    }
+
+    renderPagination() {
+        const pagination = document.getElementById('pagination');
+        pagination.innerHTML = '';
+
+        if (this.totalPages <= 1) {
+            return;
+        }
+
+        const prevButton = this.createNavButton('‹', this.currentPage - 1, this.currentPage === 1);
+        pagination.appendChild(prevButton);
+
+        const pages = this.getPageNumbers();
+        
+        pages.forEach((page, index) => {
+            if (page === '...') {
+                const dots = document.createElement('span');
+                dots.className = 'pagination-dots';
+                dots.textContent = '...';
+                pagination.appendChild(dots);
+            } else {
+                const pageButton = this.createPageButton(page, page === this.currentPage);
+                pagination.appendChild(pageButton);
+            }
+        });
+
+        const nextButton = this.createNavButton('›', this.currentPage + 1, this.currentPage === this.totalPages);
+        pagination.appendChild(nextButton);
+    }
+
+    getPageNumbers() {
+        const pages = [];
+        const current = this.currentPage;
+        const total = this.totalPages;
+
+        if (total <= 7) {
+            for (let i = 1; i <= total; i++) {
+                pages.push(i);
+            }
+        } else {
+            pages.push(1);
+
+            if (current <= 4) {
+                for (let i = 2; i <= 5; i++) {
+                    pages.push(i);
+                }
+                pages.push('...');
+                pages.push(total);
+            } else if (current >= total - 3) {
+                pages.push('...');
+                for (let i = total - 4; i <= total; i++) {
+                    pages.push(i);
+                }
+            } else {
+                pages.push('...');
+                for (let i = current - 1; i <= current + 1; i++) {
+                    pages.push(i);
+                }
+                pages.push('...');
+                pages.push(total);
+            }
+        }
+
+        return pages;
+    }
+
+    createPageButton(page, isActive) {
+        const button = document.createElement('a');
+        button.className = `pagination-item ${isActive ? 'active' : ''}`;
+        button.textContent = page;
+        button.href = '#';
+        
+        button.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (this.searchInput.value.trim()) {
+                this.showFilteredPage(page);
+            } else {
+                this.showPage(page);
+            }
+        });
+
+        return button;
+    }
+
+    createNavButton(symbol, targetPage, isDisabled) {
+        const button = document.createElement('a');
+        button.className = `pagination-nav ${isDisabled ? 'disabled' : ''}`;
+        button.innerHTML = symbol;
+        button.href = '#';
+
+        if (!isDisabled) {
+            button.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (this.searchInput.value.trim()) {
+                    this.showFilteredPage(targetPage);
+                } else {
+                    this.showPage(targetPage);
+                }
+            });
+        }
+
+        return button;
+    }
+
+    getAllJobsData() {
+        return Array.from(this.allJobs).map(jobElement => ({
+            poste: jobElement.querySelector('.job-title')?.textContent || '',
+            entreprise: jobElement.querySelector('.job-company')?.textContent || '',
+            description_nettoyee: jobElement.querySelector('.job-description-text')?.textContent || '',
+            contrat: Array.from(jobElement.querySelectorAll('.job-info-item span'))[1]?.textContent || '',
+            ville: Array.from(jobElement.querySelectorAll('.job-info-item span'))[0]?.textContent || ''
+        }));
+    }
+
+    updateSearchResults() {
+        this.allJobs.forEach(job => {
+            job.classList.add('hidden');
+        });
+
+        this.totalJobs = this.filteredJobs.length;
+        this.totalPages = Math.ceil(this.totalJobs / this.jobsPerPage);
+        this.currentPage = 1;
+
+        if (this.filteredJobs.length === 0) {
+            this.searchResultsInfo.innerHTML = '<span style="color: #ef4444;">Aucune offre trouvée pour cette recherche</span>';
+        } else {
+            this.searchResultsInfo.innerHTML = `
+                <span style="color: #10b981;">
+                    ${this.filteredJobs.length} offre${this.filteredJobs.length > 1 ? 's' : ''} trouvée${this.filteredJobs.length > 1 ? 's' : ''}
+                </span>
             `;
         }
 
-        async filterJobs(query, jobs) {
-            if (!this.apiKey || this.apiKey === 'demo-key') {
-                console.warn("Clé API Groq non configurée. La recherche intelligente est désactivée.");
-                return jobs.map(j => j.id); // Retourne tous les IDs si pas d'API key
-            }
-
-            const prompt = this.createPrompt(query, jobs);
-
-            try {
-                const response = await fetch(`${this.baseURL}/chat/completions`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${this.apiKey}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        model: this.model,
-                        messages: [{ role: "user", content: prompt }],
-                        temperature: 0,
-                        response_format: { "type": "json_object" }
-                    })
-                });
-
-                if (!response.ok) {
-                    throw new Error(`Erreur de l'API Groq: ${response.statusText}`);
-                }
-
-                const data = await response.json();
-                const result = JSON.parse(data.choices[0].message.content);
-
-                if (result && Array.isArray(result.matching_ids)) {
-                    return result.matching_ids;
-                }
-                return [];
-
-            } catch (error) {
-                console.error("Erreur lors du filtrage avec Groq:", error);
-                // En cas d'erreur, ne retourner aucun filtre pour ne pas bloquer l'utilisateur.
-                return jobs.map(j => j.id);
-            }
-        }
+        this.showFilteredPage(1);
+        this.renderPagination();
     }
+}
 
-    class JobPageManager {
-        constructor(jobsPerPage = 8) {
-            this.jobsPerPage = jobsPerPage;
-            this.currentPage = 1;
-
-            this.allJobElements = Array.from(document.querySelectorAll('.job-card'));
-            this.allJobsData = this.allJobElements.map(el => ({
-                id: el.dataset.jobId,
-                title: el.querySelector('.job-title').textContent,
-                company: el.querySelector('.job-company').textContent,
-                description: el.querySelector('.job-description-text')?.textContent || '',
-                contract: el.querySelector('.job-info-item:nth-child(2) span').textContent
-            }));
-            
-            this.visibleJobElements = [...this.allJobElements];
-
-            this.searchInput = document.getElementById('searchInput');
-            this.clearButton = document.getElementById('clearSearch');
-            this.searchResultsInfo = document.getElementById('searchResultsInfo');
-            this.totalCountElement = document.getElementById('totalCount');
-            this.paginationContainer = document.getElementById('paginationContainer');
-
-            const apiKey = '{{ config.GROQ_API_KEY if config and config.GROQ_API_KEY else "demo-key" }}';
-            this.groqSearch = new GroqIntelligentSearch(apiKey);
-
-            this.init();
-        }
-
-        init() {
-            let searchTimeout;
-            this.searchInput.addEventListener('input', (e) => {
-                this.clearButton.style.display = e.target.value ? 'flex' : 'none';
-                clearTimeout(searchTimeout);
-                searchTimeout = setTimeout(() => this.handleSearch(e.target.value), 500);
-            });
-
-            this.clearButton.addEventListener('click', () => {
-                this.searchInput.value = '';
-                this.clearButton.style.display = 'none';
-                this.handleSearch('');
-            });
-            
-            this.renderPage(1);
-        }
-
-        async handleSearch(query) {
-            if (!query.trim()) {
-                this.visibleJobElements = [...this.allJobElements];
-                this.searchResultsInfo.innerHTML = '';
-                this.renderPage(1);
-                return;
-            }
-
-            this.searchResultsInfo.innerHTML = `
-                <div class="spinner-border text-primary" role="status">
-                    <span class="visually-hidden">Loading...</span>
-                </div>
-                <span class="ms-2">Analyse en cours...</span>`;
-
-            const matchingIds = await this.groqSearch.filterJobs(query, this.allJobsData);
-            
-            this.visibleJobElements = this.allJobElements.filter(el => matchingIds.includes(el.dataset.jobId));
-            
-            if (this.visibleJobElements.length === 0) {
-                this.searchResultsInfo.innerHTML = '<span style="color: #ef4444;">Aucune offre trouvée pour cette recherche.</span>';
-            } else {
-                 this.searchResultsInfo.innerHTML = `<span style="color: #10b981;">${this.visibleJobElements.length} offre(s) pertinente(s) trouvée(s).</span>`;
-            }
-            
-            this.renderPage(1);
-        }
-        
-        renderPage(page) {
-            this.currentPage = page;
-            this.totalCountElement.textContent = this.visibleJobElements.length;
-
-            this.allJobElements.forEach(job => job.classList.add('hidden'));
-
-            const totalPages = Math.ceil(this.visibleJobElements.length / this.jobsPerPage);
-            if (totalPages === 0) {
-                this.paginationContainer.style.display = 'none';
-                return;
-            }
-            this.paginationContainer.style.display = 'flex';
-
-            const start = (page - 1) * this.jobsPerPage;
-            const end = start + this.jobsPerPage;
-            const pageJobs = this.visibleJobElements.slice(start, end);
-
-            pageJobs.forEach(job => job.classList.remove('hidden'));
-            
-            this.renderPagination(totalPages);
-        }
-        
-        renderPagination(totalPages) {
-            const pagination = document.getElementById('pagination');
-            pagination.innerHTML = '';
-
-            if (totalPages <= 1) return;
-
-            pagination.appendChild(this.createNavButton('‹', this.currentPage - 1, this.currentPage === 1));
-
-            for (let i = 1; i <= totalPages; i++) {
-                pagination.appendChild(this.createPageButton(i, i === this.currentPage));
-            }
-
-            pagination.appendChild(this.createNavButton('›', this.currentPage + 1, this.currentPage === totalPages));
-        }
-
-        createPageButton(page, isActive) {
-            const button = document.createElement('a');
-            button.className = `pagination-item ${isActive ? 'active' : ''}`;
-            button.textContent = page;
-            button.addEventListener('click', (e) => {
-                e.preventDefault();
-                this.renderPage(page);
-            });
-            return button;
-        }
-
-        createNavButton(symbol, targetPage, isDisabled) {
-            const button = document.createElement('a');
-            button.className = `pagination-nav ${isDisabled ? 'disabled' : ''}`;
-            button.innerHTML = symbol;
-            if (!isDisabled) {
-                button.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    this.renderPage(targetPage);
-                });
-            }
-            return button;
-        }
-    }
-
-    new JobPageManager(9); // 9 offres par page
+document.addEventListener('DOMContentLoaded', function() {
+    new JobsPagination(8);
 });
 </script>
 {% endblock %}
