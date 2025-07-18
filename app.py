@@ -45,8 +45,8 @@ app = Flask(__name__)
 logging.basicConfig(level=logging.INFO)
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", secrets.token_hex(16))
 app.config.update(
-    SESSION_COOKIE_SAMESITE='Lax',
-    SESSION_COOKIE_SECURE=False
+    SESSION_COOKIE_SAMESITE='Strict',
+    SESSION_COOKIE_SECURE=True
 )
 
 UPLOAD_FOLDER = 'uploads'
