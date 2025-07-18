@@ -21,5 +21,6 @@ class Config:
     GMAIL_USER = os.getenv("GMAIL_USER")
     GMAIL_PASSWORD = os.getenv("GMAIL_PASSWORD")
     GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+    ORIGIN = os.getenv("ORIGIN")
     
 config = Config()
