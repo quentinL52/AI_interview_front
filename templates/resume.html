@@ -1,3 +1,10 @@
+Vous avez absolument raison \! Mon code précédent était basé sur une structure de données incorrecte pour la section "projets". Merci de m'avoir fourni la structure JSON exacte. L'erreur vient du fait que mon code essayait de parcourir `cv_data.projets` comme une simple liste, alors qu'il s'agit d'un objet contenant deux listes distinctes : `professional` et `personal`.
+
+J'ai corrigé le template pour qu'il reflète précisément votre structure de données. Il va maintenant parcourir les projets professionnels et afficher leurs détails correctement.
+
+Voici le code complet et corrigé pour le fichier `resume.html`.
+
+```html
 {% extends "base.html" %}
 
 {% block title %}Mon CV - AIrh{% endblock %}
@@ -136,7 +143,7 @@
                                 </ul>
                             </div>
                             
-                            <div class="card">
+                            <div class="card mb-3">
                                 <div class="card-header"><strong>Formations</strong></div>
                                 <ul class="list-group list-group-flush">
                                 {% for form in cv_data.get('formations', []) %}
@@ -150,26 +157,33 @@
                                 </ul>
                             </div>
 
-                            <div class="card mt-3">
+                            <div class="card">
                                 <div class="card-header"><strong>Projets</strong></div>
                                 <ul class="list-group list-group-flush">
-                                {% for projet in cv_data.get('projets', []) %}
-                                    <li class="list-group-item">
-                                        <h5>{{ projet.nom_projet | default('Projet non spécifié') }}</h5>
-                                        {% if projet.get('description') %}
-                                            <p class="mb-1"><small>{{ projet.description }}</small></p>
-                                        {% endif %}
-                                        {% if projet.get('technologies_utilisees') %}
-                                            <div class="mt-2">
-                                                {% for tech in projet.technologies_utilisees %}
-                                                    <span class="badge bg-dark me-1 mb-1">{{ tech }}</span>
-                                                {% endfor %}
-                                            </div>
-                                        {% endif %}
-                                    </li>
-                                {% else %}
-                                    <li class="list-group-item text-muted">Aucun projet trouvé.</li>
-                                {% endfor %}
+                                    {% set projets_pro = cv_data.get('projets', {}).get('professional', []) %}
+                                    {% if projets_pro %}
+                                        {% for projet in projets_pro %}
+                                            <li class="list-group-item">
+                                                <h5>{{ projet.title | default('Projet non spécifié') }}</h5>
+                                                {% if projet.get('outcomes') %}
+                                                    <ul class="mt-2 mb-2">
+                                                        {% for outcome in projet.outcomes %}
+                                                            <li><small>{{ outcome }}</small></li>
+                                                        {% endfor %}
+                                                    </ul>
+                                                {% endif %}
+                                                {% if projet.get('technologies') %}
+                                                    <div class="mt-2">
+                                                        {% for tech in projet.technologies %}
+                                                            <span class="badge bg-dark me-1 mb-1">{{ tech }}</span>
+                                                        {% endfor %}
+                                                    </div>
+                                                {% endif %}
+                                            </li>
+                                        {% endfor %}
+                                    {% else %}
+                                        <li class="list-group-item text-muted">Aucun projet professionnel trouvé.</li>
+                                    {% endif %}
                                 </ul>
                             </div>
 
@@ -245,29 +259,20 @@ document.addEventListener('DOMContentLoaded', function () {
         try {
             const response = await fetch("{{ url_for('upload_resume') }}", { method: 'POST', body: formData });
             
-            // --- BLOC DE CORRECTION ---
-            // Vérifie si la réponse est bien du JSON avant de la traiter
             const contentType = response.headers.get("content-type");
             if (!response.ok || !contentType || !contentType.includes("application/json")) {
-                // Si la réponse n'est pas OK ou n'est pas du JSON, c'est probablement une redirection vers la page de login
-                // à cause d'une session expirée.
                 uploadStatus.textContent = 'Session expirée. Reconnexion nécessaire...';
                 uploadStatus.className = 'mt-2 text-center small text-warning';
-                // Recharge la page, ce qui redirigera l'utilisateur vers la page de connexion
                 setTimeout(() => window.location.reload(), 2000);
-                // On arrête l'exécution pour ne pas tenter de lire la réponse HTML
                 return; 
             }
-            // --- FIN DU BLOC DE CORRECTION ---
 
-            // Si le code arrive ici, la réponse est valide et OK
-            await response.json(); // On peut lire le JSON en toute sécurité
+            await response.json();
             uploadStatus.textContent = 'Analyse terminée ! Rechargement de la page...';
             uploadStatus.className = 'mt-2 text-center small text-success';
             setTimeout(() => window.location.reload(), 1500);
 
         } catch (error) {
-            // Cette partie gère les erreurs réseau ou autres problèmes imprévus
             uploadStatus.textContent = `Erreur : ${error.message}`;
             uploadStatus.className = 'mt-2 text-center small text-danger';
             submitButton.disabled = false;
@@ -299,3 +304,4 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 {% endblock %}
+```
