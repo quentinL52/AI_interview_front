@@ -150,6 +150,29 @@
                                 </ul>
                             </div>
 
+                            <div class="card mt-3">
+                                <div class="card-header"><strong>Projets</strong></div>
+                                <ul class="list-group list-group-flush">
+                                {% for projet in cv_data.get('projets', []) %}
+                                    <li class="list-group-item">
+                                        <h5>{{ projet.nom_projet | default('Projet non spécifié') }}</h5>
+                                        {% if projet.get('description') %}
+                                            <p class="mb-1"><small>{{ projet.description }}</small></p>
+                                        {% endif %}
+                                        {% if projet.get('technologies_utilisees') %}
+                                            <div class="mt-2">
+                                                {% for tech in projet.technologies_utilisees %}
+                                                    <span class="badge bg-dark me-1 mb-1">{{ tech }}</span>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </li>
+                                {% else %}
+                                    <li class="list-group-item text-muted">Aucun projet trouvé.</li>
+                                {% endfor %}
+                                </ul>
+                            </div>
+
                         {% else %}
                             <div class="text-center p-5">
                                 <i class="fas fa-eye-slash fa-3x text-muted mb-3"></i>
