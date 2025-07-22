@@ -51,7 +51,7 @@ app.config.update(
     SESSION_COOKIE_HTTPONLY=True
 )
 
-CORS(app, supports_credentials=True, origins=config.ORIGIN)
+CORS(app, supports_credentials=True, origins=Config.ORIGIN)
 
 UPLOAD_FOLDER = 'uploads'
 ALLOWED_EXTENSIONS = {'pdf'}
