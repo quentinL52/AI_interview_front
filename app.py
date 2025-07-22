@@ -161,25 +161,51 @@ def home():
 @app.route('/resume')
 @login_required
 def resume():
-    if not g.user.candidate_mongo_id:
-        return render_template('resume.html', cv_data=None)
+    """
+    Récupération du CV avec structure candidat conservée
+    """
     try:
         mongo_manager = MongoManager()
-        cv_data_full = mongo_manager.get_profile_by_id(g.user.candidate_mongo_id)
-        mongo_manager.close_connection()
-        cv_profile = cv_data_full.get('candidat') if cv_data_full else None
-        if not cv_profile:
+        
+        # 1. Essayer avec candidate_mongo_id si existant
+        if g.user.candidate_mongo_id:
+            cv_data_full = mongo_manager.get_profile_by_id(g.user.candidate_mongo_id)
+            if cv_data_full and cv_data_full.get('candidat'):
+                mongo_manager.close_connection()
+                return render_template('resume.html', cv_data=cv_data_full.get('candidat'))
+        
+        # 2. Chercher par user_id (nouveaux CV avec structure candidat)
+        cv_document = mongo_manager.candidate_collection.find_one(
+            {"user_id": g.user.google_id},
+            sort=[("created_at", -1)]
+        )
+        
+        if cv_document and cv_document.get('candidat'):
+            # Mettre à jour candidate_mongo_id pour futures requêtes
+            g.user.candidate_mongo_id = str(cv_document['_id'])
+            db.session.commit()
+            
+            mongo_manager.close_connection()
+            return render_template('resume.html', cv_data=cv_document.get('candidat'))
+        else:
             flash("Aucun CV n'a été trouvé pour votre profil.", "warning")
-        return render_template('resume.html', cv_data=cv_profile)
+            mongo_manager.close_connection()
+            return render_template('resume.html', cv_data=None)
+            
     except Exception as e:
         logging.error(f"Erreur dans /resume: {str(e)}")
         flash("Erreur lors de la récupération du CV.", "danger")
         return render_template('resume.html', cv_data=None)
 
+
 @app.route('/upload-resume', methods=['POST'])
 @login_required
 def upload_resume():
+    """
+    Upload CV avec gestion structure candidat conservée
+    """
     MODEL_API_URL = Config.MODEL_API_URL
+    
     if 'resume' not in request.files:
         return jsonify({'error': 'Aucun fichier envoyé'}), 400
     
@@ -192,8 +218,9 @@ def upload_resume():
     
     try:
         logging.info(f"Envoi du CV '{file_filename}' à l'API de parsing.")
-        files_for_api = {'file': (file_filename, file_content, 'application/pdf')}
         
+        # Envoi à l'API avec user_id
+        files_for_api = {'file': (file_filename, file_content, 'application/pdf')}
         params = {'user_id': g.user.google_id}
         
         api_response = requests.post(
@@ -204,26 +231,35 @@ def upload_resume():
         api_response.raise_for_status()
         parsed_cv_data = api_response.json()
         
-        if not parsed_cv_data:
+        if not parsed_cv_data or not parsed_cv_data.get('candidat'):
             flash("L'API n'a pas pu extraire les données du CV.", 'danger')
             return jsonify({'error': "Le traitement du CV par l'API a échoué."}), 500
         
         logging.info("CV analysé et stocké automatiquement par l'API.")
-        mongo_manager = MongoManager()
-        latest_cv = mongo_manager.candidate_collection.find_one(
-            {"user_id": g.user.google_id},
-            sort=[("created_at", -1)]
-        )
         
-        if latest_cv:
-            g.user.candidate_mongo_id = str(latest_cv['_id'])
-            db.session.commit()
-            flash('CV téléchargé et analysé avec succès !', 'success')
-            return jsonify({'success': True, 'message': 'CV traité et lié au profil'})
-        else:
-            flash('CV analysé mais liaison au profil échouée.', 'warning')
-            return jsonify({'success': True, 'message': 'CV traité mais liaison partielle'})  
-        mongo_manager.close_connection()
+        # Récupération de l'ID du CV stocké
+        mongo_manager = MongoManager()
+        try:
+            # Chercher le CV le plus récent avec structure candidat
+            latest_cv = mongo_manager.candidate_collection.find_one(
+                {"user_id": g.user.google_id, "candidat": {"$exists": True}},
+                sort=[("created_at", -1)]
+            )
+            
+            if latest_cv:
+                g.user.candidate_mongo_id = str(latest_cv['_id'])
+                db.session.commit()
+                logging.info(f"CV lié au profil utilisateur : {latest_cv['_id']}")
+                
+                flash('CV téléchargé et analysé avec succès !', 'success')
+                return jsonify({'success': True, 'message': 'CV traité et lié au profil'})
+            else:
+                flash('CV analysé mais liaison au profil échouée.', 'warning')
+                return jsonify({'success': True, 'message': 'CV traité mais liaison partielle'})
+                
+        finally:
+            mongo_manager.close_connection()
+        
     except requests.exceptions.RequestException as e:
         logging.error(f"Erreur de communication avec l'API de parsing: {e}")
         flash('Le service d\'analyse de CV est actuellement indisponible.', 'danger')
