@@ -182,29 +182,48 @@ def upload_resume():
     MODEL_API_URL = Config.MODEL_API_URL
     if 'resume' not in request.files:
         return jsonify({'error': 'Aucun fichier envoyé'}), 400
+    
     file = request.files['resume']
     if file.filename == '' or not allowed_file(file.filename):
         return jsonify({'error': 'Fichier invalide ou non sélectionné'}), 400
+    
     file_content = file.read()
     file_filename = secure_filename(file.filename)
+    
     try:
         logging.info(f"Envoi du CV '{file_filename}' à l'API de parsing.")
         files_for_api = {'file': (file_filename, file_content, 'application/pdf')}
-        api_response = requests.post(f"{MODEL_API_URL}/parse-cv/", files=files_for_api)
+        
+        params = {'user_id': g.user.google_id}
+        
+        api_response = requests.post(
+            f"{MODEL_API_URL}/parse-cv/", 
+            files=files_for_api,
+            params=params
+        )
         api_response.raise_for_status()
         parsed_cv_data = api_response.json()
+        
         if not parsed_cv_data:
             flash("L'API n'a pas pu extraire les données du CV.", 'danger')
             return jsonify({'error': "Le traitement du CV par l'API a échoué."}), 500
-        logging.info("Données reçues de l'API. Sauvegarde dans MongoDB.")
+        
+        logging.info("CV analysé et stocké automatiquement par l'API.")
         mongo_manager = MongoManager()
-        document_to_save = (parsed_cv_data)
-        candidate_mongo_id = mongo_manager.save_profile(document_to_save)
+        latest_cv = mongo_manager.candidate_collection.find_one(
+            {"user_id": g.user.google_id},
+            sort=[("created_at", -1)]
+        )
+        
+        if latest_cv:
+            g.user.candidate_mongo_id = str(latest_cv['_id'])
+            db.session.commit()
+            flash('CV téléchargé et analysé avec succès !', 'success')
+            return jsonify({'success': True, 'message': 'CV traité et lié au profil'})
+        else:
+            flash('CV analysé mais liaison au profil échouée.', 'warning')
+            return jsonify({'success': True, 'message': 'CV traité mais liaison partielle'})  
         mongo_manager.close_connection()
-        g.user.candidate_mongo_id = str(candidate_mongo_id)
-        db.session.commit()
-        flash('CV téléchargé et analysé avec succès !', 'success')
-        return jsonify({'success': True, 'message': 'CV traité et lié au profil'})
     except requests.exceptions.RequestException as e:
         logging.error(f"Erreur de communication avec l'API de parsing: {e}")
         flash('Le service d\'analyse de CV est actuellement indisponible.', 'danger')
